@@ -32,8 +32,8 @@ namespace PositionalCache
         EntityColor color;
         int id;
 
-        Observer<EngineEntity> observer;  // List of observers
-        void notifyObserver();  // Notify observers about the position change
+        Observer<EngineEntity> observer;
+        void notifyObserver();  // Notify observer about the position change
 
     };
 }

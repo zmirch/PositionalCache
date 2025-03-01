@@ -7,25 +7,22 @@ namespace PositionalCache
 	class EntityHandle
 	{
 	public:
-		EntityHandle(E* entity, int id)
+		EntityHandle(std::unique_ptr<E>&& entity, int id)
+			: engineEntity(std::move(entity)), id(id) {}
+
+		E* getEntity()
 		{
-			this->engineEntity = entity;
-			this->id = id;
+			return engineEntity.get();
 		}
 
-		E* getEntity() const
+		bool hasEntity()
 		{
-			return engineEntity;
-		}
-
-		bool hasEntity() const
-		{
-			return engineEntity;
+			return engineEntity.get();
 		}
 
 		void disable()
 		{
-			engineEntity = nullptr;
+			engineEntity.reset();
 		}
 
 		int getId()
@@ -44,8 +41,7 @@ namespace PositionalCache
 	private:
 		// Pe viitor: Posibil ca nu e nevoie sa contina un pointer, ci sa aiba suficienta informatie ca motorul sa poata 
 		// identifica la care engineEntity se refera
-		E* engineEntity = nullptr;
-		//std::unique_ptr<E> engineEntity = nullptr;
+		std::unique_ptr<E> engineEntity = nullptr;
 		int id;
 	};
 }
