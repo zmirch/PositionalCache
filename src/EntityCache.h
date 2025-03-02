@@ -18,19 +18,24 @@ namespace PositionalCache
     template <typename E>
     class EntityCache {
     public:
-        void addEntity(E* entity, const Point2D& position, int id)
+        void addEntity(std::unique_ptr<E>&& entity, const Point2D& position, int id)
         {
             Error::ASSERT(entitiesMap.find(id) == entitiesMap.end(), "Entity has already been added.");
 
-            EntityHandle newHandle{ entity, id };
-            std::pair<EntityHandle<E>, Point2D> newPair{ newHandle, position };
+            EntityHandle<E> newHandle (std::move(entity), id);
+            std::pair<EntityHandle<E>, Point2D> newPair (std::move(newHandle), position);
 
-            entitiesMap.insert({ id, newPair });
+            entitiesMap.emplace(id, std::move(newPair));
         }
 
         void removeEntity(int id)
         {
             entitiesMap.erase(id);
+
+        }
+
+        int entityCount() {
+            return entitiesMap.size();
         }
 
         void updateEntityPosition(int id, const Point2D& position)
@@ -59,17 +64,17 @@ namespace PositionalCache
             //std::cout << "Selected " << selectedEntities.size() << " entities.\n";
             return selectedEntities;
         }
-        void selectArea(PositionalCache::Bounds boundingBox, std::function<void(const EntityHandle<E>& handle)> consumer)
+        void selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityHandle<E>& handle)> consumer)
         {
-            for (auto& [entryId, pair] : entitiesMap)
+            for (auto& [entityId, pair] : entitiesMap)
             {
-                EntityHandle<E>& entryHandle = pair.first;
-                Point2D& entryPosition = pair.second;
+                EntityHandle<E>& entityHandle = pair.first;
+                Point2D& entityPosition = pair.second;
 
-                Error::ASSERT(entryHandle.hasEntity(), "Handle doesn't have an entity.");
+                Error::ASSERT(entityHandle.hasEntity(), "Handle doesn't have an entity.");
 
-                if (boundingBox.containsPosition(entryPosition))
-                    consumer(entryHandle);
+                if (boundingBox.containsPosition(entityPosition))
+                    consumer(entityHandle);
             }
         }
 
@@ -80,6 +85,25 @@ namespace PositionalCache
         void onPositionChanged(int id, const Point2D& position)
         {
             updateEntityPosition(id, position);
+        }
+
+        void getAllEntities(std::function<void(EntityHandle<E>& handle)> consumer) {
+            for (auto& [entryId, pair] : entitiesMap) {
+                EntityHandle<E>& entityHandle = pair.first;
+                consumer(entityHandle);
+            }
+        }
+
+        EntityHandle<E>& getEntityById(int id) {
+            return entitiesMap.at(id).first;
+        }
+
+        bool isValidEntity(int id) {
+            return entitiesMap.find(id) != entitiesMap.end();
+        }
+
+        void clear() {
+            entitiesMap.clear();
         }
 
     private:

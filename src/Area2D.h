@@ -13,6 +13,7 @@
 
 using namespace PositionalCache;
 
+
 class Area2D
 {
 public:
@@ -20,22 +21,26 @@ public:
 	~Area2D();
 
 	std::deque<EngineEntity> getEntities();
-	void addEntity(EngineEntity&& entity);
+	void addEntity(std::unique_ptr<EngineEntity>&& entity);
 	void clear();
 	void startRandomMovements();
 	void stopRandomMovements();
 	double getWidth();
 	double getHeight();
-	std::vector<EntityHandle<EngineEntity>> squareSelection(PositionalCache::Bounds boundingBox);
 	void setTestingStatus(bool status);
 	void addNEntities(int n);
 	void shuffleEntityPositions();
 	bool isTesting;
+	void getAllEntities(std::function<void(EntityHandle<EngineEntity>& handle)> consumer);
+	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityHandle<EngineEntity>& handle)> consumer);
+
+	bool isValidEntity(int id);
+
+	EngineEntity& getEntityById(int id);
 private:
-	int nextId = 0;
 	EntityCache<EngineEntity> entityCache;
+	int nextId = 0;
 	void randomMovementLoop();
-	std::deque<EngineEntity> entities;
 	Point2D lowerRight; // Coordinates for the lower right corner of the 2D area
 	std::thread movementThread;
 	bool stopFlag;	

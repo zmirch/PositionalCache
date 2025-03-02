@@ -7,25 +7,17 @@ namespace PositionalCache
 	class EntityHandle
 	{
 	public:
-		EntityHandle(E* entity, int id)
+		EntityHandle(std::unique_ptr<E>&& entity, int id)
+			: engineEntityPtr(entity.release()), id(id){}
+
+		E& getEntity()
 		{
-			this->engineEntity = entity;
-			this->id = id;
+			return *engineEntityPtr;
 		}
 
-		E* getEntity() const
+		bool hasEntity()
 		{
-			return engineEntity;
-		}
-
-		bool hasEntity() const
-		{
-			return engineEntity;
-		}
-
-		void disable()
-		{
-			engineEntity = nullptr;
+			return engineEntityPtr;
 		}
 
 		int getId()
@@ -41,11 +33,33 @@ namespace PositionalCache
 			}
 		};
 
+		~EntityHandle()
+		{
+			if (engineEntityPtr)
+			{
+				delete engineEntityPtr;
+				engineEntityPtr = nullptr;
+			}
+		}
+
+		EntityHandle(const EntityHandle& entityHandle) = delete;
+		EntityHandle& operator= (const EntityHandle& entityHandle) = delete;
+		EntityHandle(EntityHandle&& other) noexcept {
+			engineEntityPtr = other.engineEntityPtr;
+			id = other.id;
+			other.engineEntityPtr = nullptr;
+		}
+		EntityHandle& operator=(EntityHandle&& other) noexcept {
+			engineEntityPtr = other.engineEntityPtr;
+			id = other.id;
+			other.engineEntityPtr = nullptr;
+			return *this;
+		}
+
 	private:
 		// Pe viitor: Posibil ca nu e nevoie sa contina un pointer, ci sa aiba suficienta informatie ca motorul sa poata 
 		// identifica la care engineEntity se refera
-		E* engineEntity = nullptr;
-		//std::unique_ptr<E> engineEntity = nullptr;
+		E* engineEntityPtr = nullptr;
 		int id;
 	};
 }

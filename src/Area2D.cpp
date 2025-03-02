@@ -9,28 +9,17 @@ Area2D::~Area2D()
     stopRandomMovements(); // Ensure thread is stopped before destruction
 }
 
-std::deque<EngineEntity> Area2D::getEntities()
-{
-    return entities;
-}
 
-void Area2D::addEntity(EngineEntity&& entity)
+void Area2D::addEntity(std::unique_ptr<EngineEntity>&& entity)
 {
-    entities.emplace_back(entity);
-    entityCache.addEntity(&entities.back(), entity.getPosition(), entity.getId());
-
     // Register EntityCache as an observer for the newly added entity
-    entities.back().addObserver(&entityCache);
+    entity->addObserver(&entityCache);
+    entityCache.addEntity(std::move(entity), entity->getPosition(), entity->getId());
 }
 
 void Area2D::clear()
 {
-    for (const EngineEntity& entity : entities) {
-        //entityCache.removeEntity(entity); // Remove from cache
-        entityCache.removeEntity(entity.getId());
-    }
-
-    entities.clear();
+    entityCache.clear();
 }
 
 void Area2D::startRandomMovements()
@@ -57,11 +46,6 @@ double Area2D::getHeight()
     return lowerRight.getY();
 }
 
-std::vector<EntityHandle<EngineEntity>> Area2D::squareSelection(PositionalCache::Bounds boundingBox)
-{
-    return entityCache.squareSelection(boundingBox);
-}
-
 void Area2D::setTestingStatus(bool status)
 {
     isTesting = status;
@@ -73,10 +57,27 @@ void Area2D::addNEntities(int n)
     {
         int randomX = std::rand() % (int)getWidth();
         int randomY = std::rand() % (int)getHeight();
-        addEntity(EngineEntity(Point2D(randomX, randomY), nextId++));
+        addEntity(std::unique_ptr<EngineEntity>(new EngineEntity(Point2D(randomX, randomY), nextId++)));
     }
 }
 
+void Area2D::getAllEntities(std::function<void(EntityHandle<EngineEntity>& handle)> consumer) {
+    entityCache.getAllEntities(consumer);
+}
+
+void Area2D::selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityHandle<EngineEntity>& handle)> consumer)
+{
+    entityCache.selectArea(boundingBox, consumer);
+}
+
+bool Area2D::isValidEntity(int id) {
+    return entityCache.isValidEntity(id);
+    //return entityCache.getEntityById(id).hasEntity();
+}
+
+EngineEntity& Area2D::getEntityById(int id) {
+    return entityCache.getEntityById(id).getEntity();
+}
 void Area2D::randomMovementLoop() // Simulate movement of entities
 {
     // Random number generator setup
@@ -92,14 +93,14 @@ void Area2D::randomMovementLoop() // Simulate movement of entities
     while (!stopFlag) {
         if (!isTesting)
         {
-            for (EngineEntity& entity : entities)
-            {
+            entityCache.getAllEntities([&](EntityHandle<EngineEntity>& handle) {
+                EngineEntity& entity = handle.getEntity();
                 if (moveChance(gen) < 0.1) // 10% chance to move
                 {
                     Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
                     entity.updatePosition(newPosition);
                 }
-            }
+            });
         }
 
         // Sleep for a random time between 100ms and 1000ms
@@ -109,7 +110,7 @@ void Area2D::randomMovementLoop() // Simulate movement of entities
 
 void Area2D::shuffleEntityPositions()
 {
-    if (entities.empty()) return;
+    if (entityCache.entityCount() == 0) return;
 
     // Random number generator setup
     std::random_device rd;
@@ -118,9 +119,9 @@ void Area2D::shuffleEntityPositions()
     std::uniform_int_distribution<> posYDistribution(0, std::floor(lowerRight.getY()) - 1);
 
     // Shuffle all entity positions
-    for (EngineEntity& entity : entities)
-    {
+    entityCache.getAllEntities([&](EntityHandle<EngineEntity>& handle) {
+        EngineEntity& entity = handle.getEntity();
         Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
         entity.updatePosition(newPosition);
-    }
+    });
 }
