@@ -27,13 +27,15 @@ public:
 	void stopRandomMovements();
 	double getWidth();
 	double getHeight();
-	std::vector<EntityHandle<EngineEntity>> squareSelection(PositionalCache::Bounds boundingBox);
 	void setTestingStatus(bool status);
 	void addNEntities(int n);
 	void shuffleEntityPositions();
 	bool isTesting;
 	void getAllEntities(std::function<void(EntityHandle<EngineEntity>& handle)> consumer);
-	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(const EntityHandle<EngineEntity>& handle)> consumer);
+	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityHandle<EngineEntity>& handle)> consumer);
+
+	bool isValidEntity(int id);
+
 	EngineEntity& getEntityById(int id);
 private:
 	EntityCache<EngineEntity> entityCache;

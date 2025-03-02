@@ -35,7 +35,8 @@ void ColorSelection(EntityColor color)
 {
 	for (const int id : selectedEntitiesIds)
 	{
-		area.getEntityById(id).setColor(color);
+		if (area.isValidEntity(id))
+			area.getEntityById(id).setColor(color);
 	}
 }
 
@@ -46,7 +47,7 @@ void squareSelection(PositionalCache::Bounds boundingBox) {
 	//timer.stopTimer(SELECTION_TIMER);
 	//timer.print();
 	selectedEntitiesIds.clear();
-	area.selectArea(boundingBox, [&](EntityHandle<EngineEntity> handle) {
+	area.selectArea(boundingBox, [&](EntityHandle<EngineEntity>& handle) {
 		selectedEntitiesIds.push_back(handle.getId());
 	});
 }
@@ -60,6 +61,7 @@ void Update()
 	if (IsKeyPressed(KEY_C))
 	{
 		area.clear();
+		selectedEntitiesIds.clear();
 	}
 
 	if (IsMouseButtonPressed(0))
@@ -164,11 +166,13 @@ void Draw()
 
 	for (int id : selectedEntitiesIds)
 	{
-		EngineEntity& selectedEntity = area.getEntityById(id);
-		DrawCircle(selectedEntity.getPosition().getX(), selectedEntity.getPosition().getY(), CIRCLERADIUS + 2, WHITE);
+		if (area.isValidEntity(id)){
+			EngineEntity& selectedEntity = area.getEntityById(id);
+			DrawCircle(selectedEntity.getPosition().getX(), selectedEntity.getPosition().getY(), CIRCLERADIUS + 2, WHITE);
+		}
 	}
 
-	area.getAllEntities([&](const EntityHandle<EngineEntity>& entity) {
+	area.getAllEntities([&](EntityHandle<EngineEntity>& entity) {
 		DrawEntity(entity.getEntity());
 	});
 

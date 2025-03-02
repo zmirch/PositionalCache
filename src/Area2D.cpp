@@ -19,10 +19,7 @@ void Area2D::addEntity(std::unique_ptr<EngineEntity>&& entity)
 
 void Area2D::clear()
 {
-    entityCache.getAllEntities([&](EntityHandle<EngineEntity>& handle) {
-        EngineEntity* entity = handle.getEntity();
-        entityCache.removeEntity(entity->getId());
-    });
+    entityCache.clear();
 }
 
 void Area2D::startRandomMovements()
@@ -49,11 +46,6 @@ double Area2D::getHeight()
     return lowerRight.getY();
 }
 
-std::vector<EntityHandle<EngineEntity>> Area2D::squareSelection(PositionalCache::Bounds boundingBox)
-{
-    return entityCache.squareSelection(boundingBox);
-}
-
 void Area2D::setTestingStatus(bool status)
 {
     isTesting = status;
@@ -73,9 +65,14 @@ void Area2D::getAllEntities(std::function<void(EntityHandle<EngineEntity>& handl
     entityCache.getAllEntities(consumer);
 }
 
-void Area2D::selectArea(PositionalCache::Bounds boundingBox, std::function<void(const EntityHandle<EngineEntity>& handle)> consumer)
+void Area2D::selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityHandle<EngineEntity>& handle)> consumer)
 {
     entityCache.selectArea(boundingBox, consumer);
+}
+
+bool Area2D::isValidEntity(int id) {
+    return entityCache.isValidEntity(id);
+    //return entityCache.getEntityById(id).hasEntity();
 }
 
 EngineEntity& Area2D::getEntityById(int id) {

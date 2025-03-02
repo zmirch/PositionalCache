@@ -31,6 +31,7 @@ namespace PositionalCache
         void removeEntity(int id)
         {
             entitiesMap.erase(id);
+
         }
 
         int entityCount() {
@@ -63,7 +64,7 @@ namespace PositionalCache
             //std::cout << "Selected " << selectedEntities.size() << " entities.\n";
             return selectedEntities;
         }
-        void selectArea(PositionalCache::Bounds boundingBox, std::function<void(const EntityHandle<E>& handle)> consumer)
+        void selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityHandle<E>& handle)> consumer)
         {
             for (auto& [entityId, pair] : entitiesMap)
             {
@@ -95,6 +96,14 @@ namespace PositionalCache
 
         EntityHandle<E>& getEntityById(int id) {
             return entitiesMap.at(id).first;
+        }
+
+        bool isValidEntity(int id) {
+            return entitiesMap.find(id) != entitiesMap.end();
+        }
+
+        void clear() {
+            entitiesMap.clear();
         }
 
     private:
