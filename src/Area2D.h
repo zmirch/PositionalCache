@@ -32,7 +32,7 @@ public:
 	void shuffleEntityPositions();
 	bool isTesting;
 	void getAllEntities(std::function<void(CacheEntity<EngineEntity>& handle)> consumer);
-	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(CacheEntity<EngineEntity>& handle)> consumer);
+	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(std::shared_ptr<CacheEntity<EngineEntity>>& handle)> consumer);
 
 	bool isValidEntity(int id);
 

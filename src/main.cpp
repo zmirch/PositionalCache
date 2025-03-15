@@ -15,7 +15,7 @@ int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 4;
 
 Area2D area(Point2D(WIDTH, HEIGHT));
 
-std::vector<int> selectedEntitiesIds;
+std::vector<std::shared_ptr<CacheEntity<EngineEntity>>> selectedEntities;
 Point2D selectionPointA;
 Point2D selectionPointB;
 Rectangle selectionRectangle;
@@ -33,22 +33,19 @@ Timer timer;
 
 void ColorSelection(EntityColor color)
 {
-	for (const int id : selectedEntitiesIds)
+	for (auto& entity : selectedEntities)
 	{
-		if (area.isValidEntity(id))
-			area.getEntityById(id).setColor(color);
+		if (entity->hasEntity())
+		{
+			entity->getEntity().setColor(color);
+		}
 	}
 }
 
 void squareSelection(PositionalCache::Bounds boundingBox) {
-	// Call the Area2D's square selection method and time it
-	//timer.startTimer(SELECTION_TIMER);
-
-	//timer.stopTimer(SELECTION_TIMER);
-	//timer.print();
-	selectedEntitiesIds.clear();
-	area.selectArea(boundingBox, [&](CacheEntity<EngineEntity>& handle) {
-		selectedEntitiesIds.push_back(handle.getId());
+	selectedEntities.clear();
+	area.selectArea(boundingBox, [&](std::shared_ptr<CacheEntity<EngineEntity>>& handle) {
+			selectedEntities.push_back(handle);
 	});
 }
 
@@ -61,7 +58,7 @@ void Update()
 	if (IsKeyPressed(KEY_C))
 	{
 		area.clear();
-		selectedEntitiesIds.clear();
+		selectedEntities.clear();
 	}
 
 	if (IsMouseButtonPressed(0))
@@ -164,10 +161,11 @@ void Draw()
 	BeginDrawing();
 	ClearBackground(BLACK);
 
-	for (int id : selectedEntitiesIds)
+	for (auto& entity : selectedEntities)
 	{
-		if (area.isValidEntity(id)){
-			EngineEntity& selectedEntity = area.getEntityById(id);
+		if(entity->hasEntity())
+		{
+			EngineEntity& selectedEntity = entity->getEntity();
 			DrawCircle(selectedEntity.getPosition().getX(), selectedEntity.getPosition().getY(), CIRCLERADIUS + 2, WHITE);
 		}
 	}

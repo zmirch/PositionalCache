@@ -65,7 +65,7 @@ void Area2D::getAllEntities(std::function<void(CacheEntity<EngineEntity>& handle
     entityCache.getAllEntities(consumer);
 }
 
-void Area2D::selectArea(PositionalCache::Bounds boundingBox, std::function<void(CacheEntity<EngineEntity>& handle)> consumer)
+void Area2D::selectArea(PositionalCache::Bounds boundingBox, std::function<void(std::shared_ptr<CacheEntity<EngineEntity>>& handle)> consumer)
 {
     entityCache.selectArea(boundingBox, consumer);
 }

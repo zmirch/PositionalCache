@@ -47,35 +47,13 @@ public:
         res->second.second = position;
     }
 
-    std::vector<CacheEntity<E>> squareSelection(const PositionalCache::Bounds& boundingBox)
-    {
-        std::vector<CacheEntity<E>> selectedEntities{};
-        for (auto& [entryId, pair] : entitiesMap)
-        {
-            CacheEntity<E>& entityHandle = *pair.first.get();
-            Point2D& entityPosition = pair.second;
-
-            Error::ASSERT(entityHandle.hasEntity(), "Handle doesn't have an entity.");
-            if (boundingBox.containsPosition(entityPosition))
-            {
-                selectedEntities.push_back(entityHandle);
-            }
-        }
-
-        //std::cout << "Selected " << selectedEntities.size() << " entities.\n";
-        return selectedEntities;
-    }
-    void selectArea(PositionalCache::Bounds boundingBox, std::function<void(CacheEntity<E>& handle)> consumer)
+    void selectArea(const PositionalCache::Bounds& boundingBox, std::function<void(std::shared_ptr<CacheEntity<E>>& handle)> consumer)
     {
         for (auto& [entityId, pair] : entitiesMap)
         {
-            CacheEntity<E>& entityHandle = *pair.first.get();
-            Point2D& entityPosition = pair.second;
-
-            Error::ASSERT(entityHandle.hasEntity(), "Handle doesn't have an entity.");
-
-            if (boundingBox.containsPosition(entityPosition))
-                consumer(entityHandle);
+            Error::ASSERT(pair.first->hasEntity(), "Handle doesn't have an entity.");
+            if (boundingBox.containsPosition(pair.second))
+                consumer(pair.first);
         }
     }
 
