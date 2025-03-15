@@ -61,11 +61,11 @@ void Area2D::addNEntities(int n)
     }
 }
 
-void Area2D::getAllEntities(std::function<void(EntityHandle<EngineEntity>& handle)> consumer) {
+void Area2D::getAllEntities(std::function<void(CacheEntity<EngineEntity>& handle)> consumer) {
     entityCache.getAllEntities(consumer);
 }
 
-void Area2D::selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityHandle<EngineEntity>& handle)> consumer)
+void Area2D::selectArea(PositionalCache::Bounds boundingBox, std::function<void(CacheEntity<EngineEntity>& handle)> consumer)
 {
     entityCache.selectArea(boundingBox, consumer);
 }
@@ -93,7 +93,7 @@ void Area2D::randomMovementLoop() // Simulate movement of entities
     while (!stopFlag) {
         if (!isTesting)
         {
-            entityCache.getAllEntities([&](EntityHandle<EngineEntity>& handle) {
+            entityCache.getAllEntities([&](CacheEntity<EngineEntity>& handle) {
                 EngineEntity& entity = handle.getEntity();
                 if (moveChance(gen) < 0.1) // 10% chance to move
                 {
@@ -119,7 +119,7 @@ void Area2D::shuffleEntityPositions()
     std::uniform_int_distribution<> posYDistribution(0, std::floor(lowerRight.getY()) - 1);
 
     // Shuffle all entity positions
-    entityCache.getAllEntities([&](EntityHandle<EngineEntity>& handle) {
+    entityCache.getAllEntities([&](CacheEntity<EngineEntity>& handle) {
         EngineEntity& entity = handle.getEntity();
         Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
         entity.updatePosition(newPosition);

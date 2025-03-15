@@ -1,4 +1,4 @@
-#include "EntityHandle.h"
+#include "CacheEntity.h"
 
 namespace PositionalCache
 {

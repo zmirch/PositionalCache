@@ -5,127 +5,129 @@
 #include <unordered_map>
 #include <functional>
 
-#include "EntityHandle.h"
+#include "CacheEntity.h"
 #include "Point2D.h"
 #include "Bounds.h"
 #include "Error.h"
 
 namespace PositionalCache
 {
-    template <typename E>
-    class Observer;
+template <typename E>
+class Observer;
 
-    template <typename E>
-    class EntityCache {
-    public:
-        void addEntity(std::unique_ptr<E>&& entity, const Point2D& position, int id)
+template <typename E>
+class EntityCache {
+public:
+    void addEntity(std::unique_ptr<E>&& entity, const Point2D& position, int id)
+    {
+        Error::ASSERT(entitiesMap.find(id) == entitiesMap.end(), "Entity has already been added.");
+
+        CacheEntity<E> newHandle (std::move(entity), id);
+        std::shared_ptr<CacheEntity<E>> newEntity = std::make_shared<CacheEntity<E>>(std::move(newHandle));
+        std::pair<std::shared_ptr<CacheEntity<E>>, Point2D> newPair (std::move(newEntity), position);
+
+        entitiesMap.emplace(id, std::move(newPair));
+    }
+
+    void removeEntity(int id)
+    {
+        entitiesMap.erase(id);
+
+    }
+
+    int entityCount() {
+        return entitiesMap.size();
+    }
+
+    void updateEntityPosition(int id, const Point2D& position)
+    {
+        Error::ASSERT(entitiesMap.find(id) != entitiesMap.end(), "Couldn't find entity.");
+
+        auto res = entitiesMap.find(id);
+        res->second.second = position;
+    }
+
+    std::vector<CacheEntity<E>> squareSelection(const PositionalCache::Bounds& boundingBox)
+    {
+        std::vector<CacheEntity<E>> selectedEntities{};
+        for (auto& [entryId, pair] : entitiesMap)
         {
-            Error::ASSERT(entitiesMap.find(id) == entitiesMap.end(), "Entity has already been added.");
+            CacheEntity<E>& entityHandle = *pair.first.get();
+            Point2D& entityPosition = pair.second;
 
-            EntityHandle<E> newHandle (std::move(entity), id);
-            std::pair<EntityHandle<E>, Point2D> newPair (std::move(newHandle), position);
-
-            entitiesMap.emplace(id, std::move(newPair));
-        }
-
-        void removeEntity(int id)
-        {
-            entitiesMap.erase(id);
-
-        }
-
-        int entityCount() {
-            return entitiesMap.size();
-        }
-
-        void updateEntityPosition(int id, const Point2D& position)
-        {
-            Error::ASSERT(entitiesMap.find(id) != entitiesMap.end(), "Couldn't find entity.");
-
-            auto res = entitiesMap.find(id);
-            res->second.second = position;
-        }
-
-        std::vector<EntityHandle<E>> squareSelection(const PositionalCache::Bounds& boundingBox)
-        {
-            std::vector<EntityHandle<E>> selectedEntities{};
-            for (auto& [entryId, pair] : entitiesMap)
+            Error::ASSERT(entityHandle.hasEntity(), "Handle doesn't have an entity.");
+            if (boundingBox.containsPosition(entityPosition))
             {
-                EntityHandle<E>& entityHandle = pair.first;
-                Point2D& entityPosition = pair.second;
-
-                Error::ASSERT(entityHandle.hasEntity(), "Handle doesn't have an entity.");
-                if (boundingBox.containsPosition(entityPosition))
-                {
-                    selectedEntities.push_back(entityHandle);
-                }
-            }
-
-            //std::cout << "Selected " << selectedEntities.size() << " entities.\n";
-            return selectedEntities;
-        }
-        void selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityHandle<E>& handle)> consumer)
-        {
-            for (auto& [entityId, pair] : entitiesMap)
-            {
-                EntityHandle<E>& entityHandle = pair.first;
-                Point2D& entityPosition = pair.second;
-
-                Error::ASSERT(entityHandle.hasEntity(), "Handle doesn't have an entity.");
-
-                if (boundingBox.containsPosition(entityPosition))
-                    consumer(entityHandle);
+                selectedEntities.push_back(entityHandle);
             }
         }
 
-        Observer<E> createObserver() {
-            return { this };
-        }
-
-        void onPositionChanged(int id, const Point2D& position)
+        //std::cout << "Selected " << selectedEntities.size() << " entities.\n";
+        return selectedEntities;
+    }
+    void selectArea(PositionalCache::Bounds boundingBox, std::function<void(CacheEntity<E>& handle)> consumer)
+    {
+        for (auto& [entityId, pair] : entitiesMap)
         {
-            updateEntityPosition(id, position);
-        }
+            CacheEntity<E>& entityHandle = *pair.first.get();
+            Point2D& entityPosition = pair.second;
 
-        void getAllEntities(std::function<void(EntityHandle<E>& handle)> consumer) {
-            for (auto& [entryId, pair] : entitiesMap) {
-                EntityHandle<E>& entityHandle = pair.first;
+            Error::ASSERT(entityHandle.hasEntity(), "Handle doesn't have an entity.");
+
+            if (boundingBox.containsPosition(entityPosition))
                 consumer(entityHandle);
-            }
         }
+    }
 
-        EntityHandle<E>& getEntityById(int id) {
-            return entitiesMap.at(id).first;
+    Observer<E> createObserver() {
+        return { this };
+    }
+
+    void onPositionChanged(int id, const Point2D& position)
+    {
+        updateEntityPosition(id, position);
+    }
+
+    void getAllEntities(std::function<void(CacheEntity<E>& handle)> consumer) {
+        for (auto& [entryId, pair] : entitiesMap) {
+            CacheEntity<E>& entityHandle = *pair.first.get();
+            consumer(entityHandle);
         }
+    }
 
-        bool isValidEntity(int id) {
-            return entitiesMap.find(id) != entitiesMap.end();
-        }
+    CacheEntity<E>& getEntityById(int id) {
+        return *entitiesMap.at(id).first.get();
+    }
 
-        void clear() {
-            entitiesMap.clear();
-        }
+    bool isValidEntity(int id) {
+        return entitiesMap.find(id) != entitiesMap.end();
+    }
 
-    private:
-        std::unordered_map <int, std::pair<EntityHandle<E>, Point2D>> entitiesMap{};
-    };
+    void clear() {
+        entitiesMap.clear();
+    }
 
-    template <typename E>
-    class Observer {
-        EntityCache<E>* cache{ nullptr };
+private:
+    std::unordered_map <int, std::pair<std::shared_ptr<CacheEntity<E>>, Point2D>> entitiesMap{};
 
-    public:
-        Observer(EntityCache<E>* cache) : cache(cache) {}
+};
 
-        void onPositionChanged(int id, Point2D position) {
-           
-            Error::ASSERT(cache, "Invalid state.");
+template <typename E>
+class Observer {
+    EntityCache<E>* cache{ nullptr };
 
-            cache->onPositionChanged(id, position);
-        }
+public:
+    Observer(EntityCache<E>* cache) : cache(cache) {}
 
-        bool isActive() {
-            return cache;
-        }
-    };
+    void onPositionChanged(int id, Point2D position) {
+
+        Error::ASSERT(cache, "Invalid state.");
+
+        cache->onPositionChanged(id, position);
+    }
+
+    bool isActive() {
+        return cache;
+    }
+};
 }

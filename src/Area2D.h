@@ -31,8 +31,8 @@ public:
 	void addNEntities(int n);
 	void shuffleEntityPositions();
 	bool isTesting;
-	void getAllEntities(std::function<void(EntityHandle<EngineEntity>& handle)> consumer);
-	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityHandle<EngineEntity>& handle)> consumer);
+	void getAllEntities(std::function<void(CacheEntity<EngineEntity>& handle)> consumer);
+	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(CacheEntity<EngineEntity>& handle)> consumer);
 
 	bool isValidEntity(int id);
 

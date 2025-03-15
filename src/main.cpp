@@ -47,7 +47,7 @@ void squareSelection(PositionalCache::Bounds boundingBox) {
 	//timer.stopTimer(SELECTION_TIMER);
 	//timer.print();
 	selectedEntitiesIds.clear();
-	area.selectArea(boundingBox, [&](EntityHandle<EngineEntity>& handle) {
+	area.selectArea(boundingBox, [&](CacheEntity<EngineEntity>& handle) {
 		selectedEntitiesIds.push_back(handle.getId());
 	});
 }
@@ -172,7 +172,7 @@ void Draw()
 		}
 	}
 
-	area.getAllEntities([&](EntityHandle<EngineEntity>& entity) {
+	area.getAllEntities([&](CacheEntity<EngineEntity>& entity) {
 		DrawEntity(entity.getEntity());
 	});
 

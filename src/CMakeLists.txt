@@ -4,7 +4,7 @@ add_executable(PositionalCache
         Bounds.cpp
         EngineEntity.cpp
         EntityCache.cpp
-        EntityHandle.cpp
+        CacheEntity.cpp
         EntityCache.cpp
         Error.h
         Point2D.cpp

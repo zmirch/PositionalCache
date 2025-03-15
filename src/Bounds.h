@@ -4,21 +4,21 @@
 
 namespace PositionalCache
 {
-	class Bounds
-	{
-	public:
-		Bounds(const Point2D& pointA, const Point2D& pointB);
-		void normalize();
-		void setPointA(const Point2D& newPoint);
-		void setPointB(const Point2D& newPoint);
-		Point2D getPointA() const;
-		Point2D getPointB() const;
-		bool containsPosition(const Point2D& coordinate) const;
-		//void extendToIncludePosition(const Point2D& coordinate); // TODO in a later version
-	private:
-		Point2D pointA; // Top left corner
-		Point2D pointB; // Bottom right corner
-	};
+class Bounds
+{
+public:
+	Bounds(const Point2D& pointA, const Point2D& pointB);
+	void normalize();
+	void setPointA(const Point2D& newPoint);
+	void setPointB(const Point2D& newPoint);
+	Point2D getPointA() const;
+	Point2D getPointB() const;
+	bool containsPosition(const Point2D& coordinate) const;
+	//void extendToIncludePosition(const Point2D& coordinate); // TODO in a later version
+private:
+	Point2D pointA; // Top left corner
+	Point2D pointB; // Bottom right corner
+};
 }
 
 
