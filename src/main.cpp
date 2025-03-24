@@ -3,7 +3,6 @@
 #include <cstdlib> // For rand()
 #include <ctime>   // For time()
 #include <algorithm> // For std::min
-#include <benchmark/benchmark.h>
 
 #include <raylib.h>
 
