@@ -32,7 +32,6 @@ public:
 	void shuffleEntityPositions();
 	bool isTesting;
 	void getAllEntities(std::function<void(EntityView<EngineEntity>& safeView)> consumer);
-	//void selectArea(PositionalCache::Bounds boundingBox, std::function<void(std::shared_ptr<CacheEntity<EngineEntity>>& handle)> consumer);
 	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityView<EngineEntity>& safeView)> consumer);
 	bool isValidEntity(int id);
 

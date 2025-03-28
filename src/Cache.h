@@ -49,16 +49,6 @@ public:
         res->second.second = position;
     }
 
-    // void selectArea(const PositionalCache::Bounds& boundingBox, std::function<void(std::shared_ptr<CacheEntity<E>>& handle)> consumer)
-    // {
-    //     for (auto& [entityId, pair] : entitiesMap)
-    //     {
-    //         Error::ASSERT(pair.first->hasEntity(), "Handle doesn't have an entity.");
-    //         if (boundingBox.containsPosition(pair.second))
-    //             consumer(pair.first);
-    //     }
-    // }
-
     void selectArea(const PositionalCache::Bounds& boundingBox,
                 std::function<void(EntityView<E>& handle)> consumer)
     {
@@ -69,9 +59,6 @@ public:
             {
                 EntityView<E> safeView(pair.first);
                 consumer(safeView);
-                // auto copyOfShared = pair.first;
-                // SafeEntityHandle<E> safeHandle(std::move(copyOfShared));
-                // consumer(safeHandle);
             }
         }
     }
@@ -92,9 +79,6 @@ public:
             EntityView<E> safeView(copyOfShared);
             consumer(safeView);
 
-            // CacheEntity<E>& entityHandle = *pair.first.get();
-            //
-            // consumer(entityHandle);
         }
     }
 

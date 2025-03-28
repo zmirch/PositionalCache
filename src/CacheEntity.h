@@ -60,11 +60,8 @@ public:
 	}
 
 private:
-	// Pe viitor: Posibil ca nu e nevoie sa contina un pointer, ci sa aiba suficienta informatie ca motorul sa poata
-	// identifica la care engineEntity se refera
 	E* engineEntityPtr = nullptr;
 	int id;
-	//int numberOfReferences;
 };
 }
 

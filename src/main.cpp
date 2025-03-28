@@ -173,8 +173,6 @@ void Draw()
 	DrawText("100", 80, 93, 17, WHITE);
 	DrawText("1000", 120, 93, 17, WHITE);
 	DrawText("10k", 160, 93, 17, WHITE);
-	//DrawText("Test A", 30, static_cast<float>(HEIGHT) - 35, 17, WHITE);
-	//DrawText("Test B", 130, static_cast<float>(HEIGHT) - 35, 17, WHITE);
 	blueButton.Draw();
 	greenButton.Draw();
 	redButton.Draw();

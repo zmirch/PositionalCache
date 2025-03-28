@@ -9,7 +9,6 @@ Area2D::~Area2D()
     stopRandomMovements(); // Ensure thread is stopped before destruction
 }
 
-
 void Area2D::addEntity(std::unique_ptr<EngineEntity>&& entity)
 {
     // Register EntityCache as an observer for the newly added entity
