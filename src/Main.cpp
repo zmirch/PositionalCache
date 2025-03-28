@@ -9,6 +9,9 @@
 #include "Bounds.h"
 #include "Button.h"
 
+namespace Engine
+{
+
 int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 4;
 
 Area2D area(Point2D(WIDTH, HEIGHT));
@@ -61,7 +64,7 @@ void Update()
 	if (IsMouseButtonPressed(0))
 	{
 		Vector2 mousePosition = GetMousePosition();
-		
+
 		// Update selection start point
 		selectionPointA.setX(mousePosition.x);
 		selectionPointA.setY(mousePosition.y);
@@ -183,13 +186,16 @@ void Draw()
 
 	EndDrawing();
 }
+}
+
+using namespace Engine;
 
 int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Prototype 3");
 	SetTargetFPS(60);
 
-	std::srand(static_cast<unsigned>(std::time(0))); 
+	std::srand(static_cast<unsigned>(std::time(0)));
 
 	area.startRandomMovements();
 

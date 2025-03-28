@@ -11,6 +11,9 @@
 
 using namespace PositionalCache;
 
+namespace Engine
+{
+
 class Area2D
 {
 public:
@@ -39,7 +42,8 @@ private:
 	void randomMovementLoop();
 	Point2D lowerRight; // Coordinates for the lower right corner of the 2D area
 	std::thread movementThread;
-	bool stopFlag;	
+	bool stopFlag;
 
 };
 
+}

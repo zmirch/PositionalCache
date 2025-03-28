@@ -2,9 +2,12 @@
 
 #include <iostream>
 
+namespace Engine
+{
+
 Area2D::Area2D(Point2D lowerRight) : lowerRight(lowerRight), stopFlag(false), isTesting(false) {}
 
-Area2D::~Area2D() 
+Area2D::~Area2D()
 {
     stopRandomMovements(); // Ensure thread is stopped before destruction
 }
@@ -122,4 +125,6 @@ void Area2D::shuffleEntityPositions()
         Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
         entity.updatePosition(newPosition);
     });
+}
+
 }

@@ -4,6 +4,8 @@
 #include "Point2D.h"
 using namespace PositionalCache;
 
+namespace Engine
+{
 enum class EntityColor {
     Red,
     Blue,
@@ -29,3 +31,4 @@ private:
     Observer<EngineEntity> observer;
     void notifyObserver();  // Notify observer about the position change
 };
+}
