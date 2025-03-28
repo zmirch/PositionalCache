@@ -8,7 +8,7 @@ template <typename E>
 class EntityView {
 // for when we simply want to view entity variables rather than store it
 public:
-    EntityView(std::shared_ptr<CacheEntity<E>>& ptr) : entityPtr(&ptr) {}
+    EntityView(std::shared_ptr<Entity<E>>& ptr) : entityPtr(&ptr) {}
     EntityHandle<E> getHandle()
     {
         auto copyOfPointer = *entityPtr;
@@ -34,7 +34,7 @@ public:
     };
 
 private:
-    std::shared_ptr<CacheEntity<E>>* entityPtr;
+    std::shared_ptr<Entity<E>>* entityPtr;
 };
 
 }

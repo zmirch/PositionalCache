@@ -1,22 +1,22 @@
 #pragma once
 
 #include <memory>
-#include "CacheEntity.h"
+#include "Entity.h"
 
 namespace PositionalCache {
 template <typename E>
 class EntityHandle {
 
 public:
-    explicit EntityHandle(std::shared_ptr<CacheEntity<E>>&& ptr) : entityPtr(std::move(ptr)) {}
+    explicit EntityHandle(std::shared_ptr<Entity<E>>&& ptr) : entityPtr(std::move(ptr)) {}
 
-    CacheEntity<E>* operator->() const
+    Entity<E>* operator->() const
     {   // overload arrow operator to allow accessing to the entity
         return entityPtr.get();
     }
 
 private:
-    std::shared_ptr<CacheEntity<E>> entityPtr;
+    std::shared_ptr<Entity<E>> entityPtr;
 
 };
 }

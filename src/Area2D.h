@@ -1,10 +1,8 @@
 #pragma once
 
 #include <deque>
-#include <chrono>
 #include <thread>
 #include <random>
-#include <cmath>
 
 #include "EngineEntity.h"
 #include "Point2D.h"
@@ -12,7 +10,6 @@
 #include "Bounds.h"
 
 using namespace PositionalCache;
-
 
 class Area2D
 {
@@ -37,7 +34,7 @@ public:
 
 	EngineEntity& getEntityById(int id);
 private:
-	EntityCache<EngineEntity> entityCache;
+	Cache<EngineEntity> entityCache;
 	int nextId = 0;
 	void randomMovementLoop();
 	Point2D lowerRight; // Coordinates for the lower right corner of the 2D area

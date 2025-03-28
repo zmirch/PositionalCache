@@ -1,12 +1,9 @@
 #pragma once
 
-#include <string>
-#include <vector>
 #include "Cache.h"
 #include "Point2D.h"
+using namespace PositionalCache;
 
-namespace PositionalCache
-{
 enum class EntityColor {
     Red,
     Blue,
@@ -19,12 +16,9 @@ public:
     EngineEntity(Point2D position, int id);
     void setColor(EntityColor color);
     EntityColor getColor() const;
-
     void updatePosition(Point2D newCoordinates);
     Point2D getPosition() const;
-
     void addObserver(Observer<EngineEntity>&& observer);
-
     int getId() const;
 
 private:
@@ -34,6 +28,4 @@ private:
 
     Observer<EngineEntity> observer;
     void notifyObserver();  // Notify observer about the position change
-
 };
-}

@@ -2,15 +2,14 @@
 #include <memory>
 #include <vector>
 
-
 namespace PositionalCache
 {
 /// @brief
 template <typename E>
-class CacheEntity
+class Entity
 {
 public:
-	CacheEntity(std::unique_ptr<E>&& entity, int id)
+	Entity(std::unique_ptr<E>&& entity, int id)
 		: engineEntityPtr(entity.release()), id(id){}
 
 	E& getEntity()
@@ -30,13 +29,13 @@ public:
 
 	struct Compare
 	{
-		bool operator() (const CacheEntity<E>& lhs, const CacheEntity<E>& rhs) const
+		bool operator() (const Entity<E>& lhs, const Entity<E>& rhs) const
 		{
 			return lhs.id < rhs.id;
 		}
 	};
 
-	~CacheEntity()
+	~Entity()
 	{
 		if (engineEntityPtr)
 		{
@@ -45,14 +44,14 @@ public:
 		}
 	}
 
-	CacheEntity(const CacheEntity& entityHandle) = delete;
-	CacheEntity& operator= (const CacheEntity& entityHandle) = delete;
-	CacheEntity(CacheEntity&& other) noexcept {
+	Entity(const Entity& entityHandle) = delete;
+	Entity& operator= (const Entity& entityHandle) = delete;
+	Entity(Entity&& other) noexcept {
 		engineEntityPtr = other.engineEntityPtr;
 		id = other.id;
 		other.engineEntityPtr = nullptr;
 	}
-	CacheEntity& operator=(CacheEntity&& other) noexcept {
+	Entity& operator=(Entity&& other) noexcept {
 		engineEntityPtr = other.engineEntityPtr;
 		id = other.id;
 		other.engineEntityPtr = nullptr;

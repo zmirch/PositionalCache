@@ -3,9 +3,6 @@ add_executable(PositionalCache
         Area2D.cpp
         Bounds.cpp
         EngineEntity.cpp
-        Cache.cpp
-        CacheEntity.cpp
-        Cache.cpp
         Error.h
         Point2D.cpp
         Button.cpp

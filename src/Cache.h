@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <functional>
 
-#include "CacheEntity.h"
+#include "Entity.h"
 #include "EntityHandle.h"
 #include "Point2D.h"
 #include "Bounds.h"
@@ -18,15 +18,15 @@ template <typename E>
 class Observer;
 
 template <typename E>
-class EntityCache {
+class Cache {
 public:
     void addEntity(std::unique_ptr<E>&& entity, const Point2D& position, int id)
     {
         Error::ASSERT(entitiesMap.find(id) == entitiesMap.end(), "Entity has already been added.");
 
-        CacheEntity<E> newHandle (std::move(entity), id);
-        std::shared_ptr<CacheEntity<E>> newEntity = std::make_shared<CacheEntity<E>>(std::move(newHandle));
-        std::pair<std::shared_ptr<CacheEntity<E>>, Point2D> newPair (std::move(newEntity), position);
+        Entity<E> newHandle (std::move(entity), id);
+        std::shared_ptr<Entity<E>> newEntity = std::make_shared<Entity<E>>(std::move(newHandle));
+        std::pair<std::shared_ptr<Entity<E>>, Point2D> newPair (std::move(newEntity), position);
 
         entitiesMap.emplace(id, std::move(newPair));
     }
@@ -34,7 +34,6 @@ public:
     void removeEntity(int id)
     {
         entitiesMap.erase(id);
-
     }
 
     int entityCount() {
@@ -78,11 +77,10 @@ public:
             auto copyOfShared = pair.first;
             EntityView<E> safeView(copyOfShared);
             consumer(safeView);
-
         }
     }
 
-    CacheEntity<E>& getEntityById(int id) {
+    Entity<E>& getEntityById(int id) {
         return *entitiesMap.at(id).first.get();
     }
 
@@ -95,21 +93,19 @@ public:
     }
 
 private:
-    std::unordered_map <int, std::pair<std::shared_ptr<CacheEntity<E>>, Point2D>> entitiesMap{};
+    std::unordered_map <int, std::pair<std::shared_ptr<Entity<E>>, Point2D>> entitiesMap{};
 
 };
 
 template <typename E>
 class Observer {
-    EntityCache<E>* cache{ nullptr };
+    Cache<E>* cache{ nullptr };
 
 public:
-    Observer(EntityCache<E>* cache) : cache(cache) {}
+    Observer(Cache<E>* cache) : cache(cache) {}
 
     void onPositionChanged(int id, Point2D position) {
-
         Error::ASSERT(cache, "Invalid state.");
-
         cache->onPositionChanged(id, position);
     }
 
