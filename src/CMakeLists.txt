@@ -3,18 +3,17 @@ add_executable(PositionalCache
         Area2D.cpp
         Bounds.cpp
         EngineEntity.cpp
-        EntityCache.cpp
+        Cache.cpp
         CacheEntity.cpp
-        EntityCache.cpp
+        Cache.cpp
         Error.h
         Point2D.cpp
-        Timer.cpp
         Button.cpp
         Button.h
-        SafeEntityHandle.cpp
-        SafeEntityHandle.h
-        SafeEntityView.cpp
-        SafeEntityView.h
+        EntityHandle.cpp
+        EntityHandle.h
+        EntityView.cpp
+        EntityView.h
 )
 
 # Link Raylib to the executable

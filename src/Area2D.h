@@ -8,7 +8,7 @@
 
 #include "EngineEntity.h"
 #include "Point2D.h"
-#include "EntityCache.h"
+#include "Cache.h"
 #include "Bounds.h"
 
 using namespace PositionalCache;
@@ -31,9 +31,9 @@ public:
 	void addNEntities(int n);
 	void shuffleEntityPositions();
 	bool isTesting;
-	void getAllEntities(std::function<void(SafeEntityView<EngineEntity>& safeView)> consumer);
+	void getAllEntities(std::function<void(EntityView<EngineEntity>& safeView)> consumer);
 	//void selectArea(PositionalCache::Bounds boundingBox, std::function<void(std::shared_ptr<CacheEntity<EngineEntity>>& handle)> consumer);
-	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(SafeEntityView<EngineEntity>& safeView)> consumer);
+	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityView<EngineEntity>& safeView)> consumer);
 	bool isValidEntity(int id);
 
 	EngineEntity& getEntityById(int id);

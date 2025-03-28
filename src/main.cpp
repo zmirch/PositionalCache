@@ -6,7 +6,6 @@
 
 #include <raylib.h>
 
-#include "Timer.h"
 #include "Bounds.h"
 #include "Button.h"
 
@@ -14,7 +13,7 @@ int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 4;
 
 Area2D area(Point2D(WIDTH, HEIGHT));
 
-std::vector<SafeEntityHandle<EngineEntity>> selectedEntities;
+std::vector<EntityHandle<EngineEntity>> selectedEntities;
 Point2D selectionPointA;
 Point2D selectionPointB;
 Rectangle selectionRectangle;
@@ -28,7 +27,6 @@ Button add1000EntitiesButton = Button(Vector2{ static_cast<float>(120), static_c
 Button add10KEntitiesButton = Button(Vector2{ static_cast<float>(160), static_cast<float>(70) }, 20, 20, LIGHTGRAY);
 
 const int SELECTION_TIMER{ 0 };
-Timer timer;
 
 void ColorSelection(EntityColor color)
 {
@@ -43,7 +41,7 @@ void ColorSelection(EntityColor color)
 
 void squareSelection(PositionalCache::Bounds boundingBox) {
 	selectedEntities.clear();
-	area.selectArea(boundingBox, [&](SafeEntityView<EngineEntity>& safeView) {
+	area.selectArea(boundingBox, [&](EntityView<EngineEntity>& safeView) {
 		selectedEntities.push_back(safeView.getHandle());
 	});
 }
@@ -161,7 +159,7 @@ void Draw()
 		}
 	}
 
-	area.getAllEntities([&](SafeEntityView<EngineEntity>& safeView) {
+	area.getAllEntities([&](EntityView<EngineEntity>& safeView) {
 		DrawEntity(safeView.getEntity());
 	});
 
@@ -196,8 +194,6 @@ int main()
 	std::srand(static_cast<unsigned>(std::time(0))); 
 
 	area.startRandomMovements();
-
-	timer.addTimer(SELECTION_TIMER, "Square Selection");
 
 	while (!WindowShouldClose())
 	{

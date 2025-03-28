@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include "EntityCache.h"
+#include "Cache.h"
 #include "Point2D.h"
 
 namespace PositionalCache

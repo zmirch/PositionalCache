@@ -1,7 +1,7 @@
 #include <benchmark/benchmark.h>
 #include "../src/Area2D.h"
 
-std::vector<SafeEntityHandle<EngineEntity>> selectedEntities;
+std::vector<EntityHandle<EngineEntity>> selectedEntities;
 int WIDTH = 1280, HEIGHT = 800;
 
 static void BM_SquareSelection_VaryingEntityCounts(benchmark::State& state) {
@@ -22,7 +22,7 @@ static void BM_SquareSelection_VaryingEntityCounts(benchmark::State& state) {
         area.shuffleEntityPositions();  // Shuffle entities before each iteration
         state.ResumeTiming();
 
-        area.selectArea(testBounds, [&](SafeEntityView<EngineEntity>& safeView) {
+        area.selectArea(testBounds, [&](EntityView<EngineEntity>& safeView) {
             selectedEntities.push_back(safeView.getHandle());
         });
         benchmark::DoNotOptimize(selectedEntities);

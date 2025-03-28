@@ -5,10 +5,10 @@
 
 namespace PositionalCache {
 template <typename E>
-class SafeEntityHandle {
+class EntityHandle {
 
 public:
-    explicit SafeEntityHandle(std::shared_ptr<CacheEntity<E>>&& ptr) : entityPtr(std::move(ptr)) {}
+    explicit EntityHandle(std::shared_ptr<CacheEntity<E>>&& ptr) : entityPtr(std::move(ptr)) {}
 
     CacheEntity<E>* operator->() const
     {   // overload arrow operator to allow accessing to the entity
