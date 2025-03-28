@@ -4,8 +4,10 @@
 
 using namespace PositionalCache;
 
+namespace Engine
+{
 EngineEntity::EngineEntity(Point2D position, int id)
-    : observer(nullptr), id(id), color(EntityColor::Blue)
+: observer(nullptr), id(id), color(EntityColor::Blue)
 {
     coordinates.setX(position.getX());
     coordinates.setY(position.getY());
@@ -44,4 +46,5 @@ void EngineEntity::notifyObserver() {
 int EngineEntity::getId() const
 {
     return id;
+}
 }

@@ -3,19 +3,20 @@
 #include <cstdlib> // For rand()
 #include <ctime>   // For time()
 #include <algorithm> // For std::min
-#include <benchmark/benchmark.h>
 
 #include <raylib.h>
 
-#include "Timer.h"
 #include "Bounds.h"
 #include "Button.h"
+
+namespace Engine
+{
 
 int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 4;
 
 Area2D area(Point2D(WIDTH, HEIGHT));
 
-std::vector<int> selectedEntitiesIds;
+std::vector<EntityHandle<EngineEntity>> selectedEntities;
 Point2D selectionPointA;
 Point2D selectionPointB;
 Rectangle selectionRectangle;
@@ -29,26 +30,22 @@ Button add1000EntitiesButton = Button(Vector2{ static_cast<float>(120), static_c
 Button add10KEntitiesButton = Button(Vector2{ static_cast<float>(160), static_cast<float>(70) }, 20, 20, LIGHTGRAY);
 
 const int SELECTION_TIMER{ 0 };
-Timer timer;
 
 void ColorSelection(EntityColor color)
 {
-	for (const int id : selectedEntitiesIds)
+	for (auto& entity : selectedEntities)
 	{
-		if (area.isValidEntity(id))
-			area.getEntityById(id).setColor(color);
+		if (entity->hasEntity())
+		{
+			entity->getEntity().setColor(color);
+		}
 	}
 }
 
 void squareSelection(PositionalCache::Bounds boundingBox) {
-	// Call the Area2D's square selection method and time it
-	//timer.startTimer(SELECTION_TIMER);
-
-	//timer.stopTimer(SELECTION_TIMER);
-	//timer.print();
-	selectedEntitiesIds.clear();
-	area.selectArea(boundingBox, [&](EntityHandle<EngineEntity>& handle) {
-		selectedEntitiesIds.push_back(handle.getId());
+	selectedEntities.clear();
+	area.selectArea(boundingBox, [&](EntityView<EngineEntity>& safeView) {
+		selectedEntities.push_back(safeView.getHandle());
 	});
 }
 
@@ -61,13 +58,13 @@ void Update()
 	if (IsKeyPressed(KEY_C))
 	{
 		area.clear();
-		selectedEntitiesIds.clear();
+		selectedEntities.clear();
 	}
 
 	if (IsMouseButtonPressed(0))
 	{
 		Vector2 mousePosition = GetMousePosition();
-		
+
 		// Update selection start point
 		selectionPointA.setX(mousePosition.x);
 		selectionPointA.setY(mousePosition.y);
@@ -111,14 +108,6 @@ void Update()
 		{
 			area.addNEntities(10000);
 		}
-		/*else if (testAButton.isPressed(mousePosition, true))
-		{
-			runTestA();
-		}
-		else if (testBButton.isPressed(mousePosition, true))
-		{
-			runTestB();
-		}*/
 		else
 		{
 			// Update selection end point
@@ -164,16 +153,17 @@ void Draw()
 	BeginDrawing();
 	ClearBackground(BLACK);
 
-	for (int id : selectedEntitiesIds)
+	for (auto& entity : selectedEntities)
 	{
-		if (area.isValidEntity(id)){
-			EngineEntity& selectedEntity = area.getEntityById(id);
+		if(entity->hasEntity())
+		{
+			EngineEntity& selectedEntity = entity->getEntity();
 			DrawCircle(selectedEntity.getPosition().getX(), selectedEntity.getPosition().getY(), CIRCLERADIUS + 2, WHITE);
 		}
 	}
 
-	area.getAllEntities([&](EntityHandle<EngineEntity>& entity) {
-		DrawEntity(entity.getEntity());
+	area.getAllEntities([&](EntityView<EngineEntity>& safeView) {
+		DrawEntity(safeView.getEntity());
 	});
 
 	DrawRectangleLinesEx(selectionRectangle, 1, LIGHTGRAY);
@@ -186,8 +176,6 @@ void Draw()
 	DrawText("100", 80, 93, 17, WHITE);
 	DrawText("1000", 120, 93, 17, WHITE);
 	DrawText("10k", 160, 93, 17, WHITE);
-	//DrawText("Test A", 30, static_cast<float>(HEIGHT) - 35, 17, WHITE);
-	//DrawText("Test B", 130, static_cast<float>(HEIGHT) - 35, 17, WHITE);
 	blueButton.Draw();
 	greenButton.Draw();
 	redButton.Draw();
@@ -195,22 +183,21 @@ void Draw()
 	add100EntitiesButton.Draw();
 	add1000EntitiesButton.Draw();
 	add10KEntitiesButton.Draw();
-	//testAButton.Draw();
-	//testBButton.Draw();
 
 	EndDrawing();
 }
+}
+
+using namespace Engine;
 
 int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Prototype 3");
 	SetTargetFPS(60);
 
-	std::srand(static_cast<unsigned>(std::time(0))); 
+	std::srand(static_cast<unsigned>(std::time(0)));
 
 	area.startRandomMovements();
-
-	timer.addTimer(SELECTION_TIMER, "Square Selection");
 
 	while (!WindowShouldClose())
 	{

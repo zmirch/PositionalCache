@@ -2,13 +2,15 @@
 
 #include <iostream>
 
+namespace Engine
+{
+
 Area2D::Area2D(Point2D lowerRight) : lowerRight(lowerRight), stopFlag(false), isTesting(false) {}
 
-Area2D::~Area2D() 
+Area2D::~Area2D()
 {
     stopRandomMovements(); // Ensure thread is stopped before destruction
 }
-
 
 void Area2D::addEntity(std::unique_ptr<EngineEntity>&& entity)
 {
@@ -61,18 +63,17 @@ void Area2D::addNEntities(int n)
     }
 }
 
-void Area2D::getAllEntities(std::function<void(EntityHandle<EngineEntity>& handle)> consumer) {
+void Area2D::getAllEntities(std::function<void(EntityView<EngineEntity>& safeView)> consumer) {
     entityCache.getAllEntities(consumer);
 }
 
-void Area2D::selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityHandle<EngineEntity>& handle)> consumer)
+void Area2D::selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityView<EngineEntity>& safeView)> consumer)
 {
     entityCache.selectArea(boundingBox, consumer);
 }
 
 bool Area2D::isValidEntity(int id) {
     return entityCache.isValidEntity(id);
-    //return entityCache.getEntityById(id).hasEntity();
 }
 
 EngineEntity& Area2D::getEntityById(int id) {
@@ -93,8 +94,8 @@ void Area2D::randomMovementLoop() // Simulate movement of entities
     while (!stopFlag) {
         if (!isTesting)
         {
-            entityCache.getAllEntities([&](EntityHandle<EngineEntity>& handle) {
-                EngineEntity& entity = handle.getEntity();
+            entityCache.getAllEntities([&](EntityView<EngineEntity>& safeView) {
+                EngineEntity& entity = safeView.getHandle()->getEntity();
                 if (moveChance(gen) < 0.1) // 10% chance to move
                 {
                     Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
@@ -119,9 +120,11 @@ void Area2D::shuffleEntityPositions()
     std::uniform_int_distribution<> posYDistribution(0, std::floor(lowerRight.getY()) - 1);
 
     // Shuffle all entity positions
-    entityCache.getAllEntities([&](EntityHandle<EngineEntity>& handle) {
-        EngineEntity& entity = handle.getEntity();
+    entityCache.getAllEntities([&](EntityView<EngineEntity>& safeView) {
+        EngineEntity& entity = safeView.getHandle()->getEntity();
         Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
         entity.updatePosition(newPosition);
     });
+}
+
 }

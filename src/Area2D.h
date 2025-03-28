@@ -1,18 +1,18 @@
 #pragma once
 
 #include <deque>
-#include <chrono>
 #include <thread>
 #include <random>
-#include <cmath>
 
 #include "EngineEntity.h"
 #include "Point2D.h"
-#include "EntityCache.h"
+#include "Cache.h"
 #include "Bounds.h"
 
 using namespace PositionalCache;
 
+namespace Engine
+{
 
 class Area2D
 {
@@ -31,19 +31,19 @@ public:
 	void addNEntities(int n);
 	void shuffleEntityPositions();
 	bool isTesting;
-	void getAllEntities(std::function<void(EntityHandle<EngineEntity>& handle)> consumer);
-	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityHandle<EngineEntity>& handle)> consumer);
-
+	void getAllEntities(std::function<void(EntityView<EngineEntity>& safeView)> consumer);
+	void selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityView<EngineEntity>& safeView)> consumer);
 	bool isValidEntity(int id);
 
 	EngineEntity& getEntityById(int id);
 private:
-	EntityCache<EngineEntity> entityCache;
+	Cache<EngineEntity> entityCache;
 	int nextId = 0;
 	void randomMovementLoop();
 	Point2D lowerRight; // Coordinates for the lower right corner of the 2D area
 	std::thread movementThread;
-	bool stopFlag;	
+	bool stopFlag;
 
 };
 
+}
