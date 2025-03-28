@@ -6,9 +6,11 @@
 #include <functional>
 
 #include "CacheEntity.h"
+#include "SafeEntityHandle.h"
 #include "Point2D.h"
 #include "Bounds.h"
 #include "Error.h"
+#include "SafeEntityView.h"
 
 namespace PositionalCache
 {
@@ -47,13 +49,30 @@ public:
         res->second.second = position;
     }
 
-    void selectArea(const PositionalCache::Bounds& boundingBox, std::function<void(std::shared_ptr<CacheEntity<E>>& handle)> consumer)
+    // void selectArea(const PositionalCache::Bounds& boundingBox, std::function<void(std::shared_ptr<CacheEntity<E>>& handle)> consumer)
+    // {
+    //     for (auto& [entityId, pair] : entitiesMap)
+    //     {
+    //         Error::ASSERT(pair.first->hasEntity(), "Handle doesn't have an entity.");
+    //         if (boundingBox.containsPosition(pair.second))
+    //             consumer(pair.first);
+    //     }
+    // }
+
+    void selectArea(const PositionalCache::Bounds& boundingBox,
+                std::function<void(SafeEntityView<E>& handle)> consumer)
     {
         for (auto& [entityId, pair] : entitiesMap)
         {
             Error::ASSERT(pair.first->hasEntity(), "Handle doesn't have an entity.");
             if (boundingBox.containsPosition(pair.second))
-                consumer(pair.first);
+            {
+                SafeEntityView<E> safeView(pair.first);
+                consumer(safeView);
+                // auto copyOfShared = pair.first;
+                // SafeEntityHandle<E> safeHandle(std::move(copyOfShared));
+                // consumer(safeHandle);
+            }
         }
     }
 
@@ -66,10 +85,17 @@ public:
         updateEntityPosition(id, position);
     }
 
-    void getAllEntities(std::function<void(CacheEntity<E>& handle)> consumer) {
+
+    void getAllEntities(std::function<void(SafeEntityView<E>& view)> consumer) {
         for (auto& [entryId, pair] : entitiesMap) {
-            CacheEntity<E>& entityHandle = *pair.first.get();
-            consumer(entityHandle);
+
+            auto copyOfShared = pair.first;
+            SafeEntityView<E> safeView(copyOfShared);
+            consumer(safeView);
+
+            // CacheEntity<E>& entityHandle = *pair.first.get();
+            //
+            // consumer(entityHandle);
         }
     }
 

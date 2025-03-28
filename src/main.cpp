@@ -14,7 +14,7 @@ int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 4;
 
 Area2D area(Point2D(WIDTH, HEIGHT));
 
-std::vector<std::shared_ptr<CacheEntity<EngineEntity>>> selectedEntities;
+std::vector<SafeEntityHandle<EngineEntity>> selectedEntities;
 Point2D selectionPointA;
 Point2D selectionPointB;
 Rectangle selectionRectangle;
@@ -43,8 +43,8 @@ void ColorSelection(EntityColor color)
 
 void squareSelection(PositionalCache::Bounds boundingBox) {
 	selectedEntities.clear();
-	area.selectArea(boundingBox, [&](std::shared_ptr<CacheEntity<EngineEntity>>& handle) {
-			selectedEntities.push_back(handle);
+	area.selectArea(boundingBox, [&](SafeEntityView<EngineEntity>& safeView) {
+		selectedEntities.push_back(safeView.getHandle());
 	});
 }
 
@@ -107,14 +107,6 @@ void Update()
 		{
 			area.addNEntities(10000);
 		}
-		/*else if (testAButton.isPressed(mousePosition, true))
-		{
-			runTestA();
-		}
-		else if (testBButton.isPressed(mousePosition, true))
-		{
-			runTestB();
-		}*/
 		else
 		{
 			// Update selection end point
@@ -169,8 +161,8 @@ void Draw()
 		}
 	}
 
-	area.getAllEntities([&](CacheEntity<EngineEntity>& entity) {
-		DrawEntity(entity.getEntity());
+	area.getAllEntities([&](SafeEntityView<EngineEntity>& safeView) {
+		DrawEntity(safeView.getEntity());
 	});
 
 	DrawRectangleLinesEx(selectionRectangle, 1, LIGHTGRAY);
@@ -192,8 +184,6 @@ void Draw()
 	add100EntitiesButton.Draw();
 	add1000EntitiesButton.Draw();
 	add10KEntitiesButton.Draw();
-	//testAButton.Draw();
-	//testBButton.Draw();
 
 	EndDrawing();
 }

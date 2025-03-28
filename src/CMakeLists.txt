@@ -11,6 +11,10 @@ add_executable(PositionalCache
         Timer.cpp
         Button.cpp
         Button.h
+        SafeEntityHandle.cpp
+        SafeEntityHandle.h
+        SafeEntityView.cpp
+        SafeEntityView.h
 )
 
 # Link Raylib to the executable
