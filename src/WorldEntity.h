@@ -12,15 +12,15 @@ enum class EntityColor {
     Green
 };
 
-class EngineEntity
+class WorldEntity
 {
 public:
-    EngineEntity(Point2D position, int id);
+    WorldEntity(Point2D position, int id);
     void setColor(EntityColor color);
     EntityColor getColor() const;
     void updatePosition(Point2D newCoordinates);
     Point2D getPosition() const;
-    void addObserver(Observer<EngineEntity>&& observer);
+    void addObserver(Observer<WorldEntity>&& observer);
     int getId() const;
 
 private:
@@ -28,7 +28,7 @@ private:
     EntityColor color;
     int id;
 
-    Observer<EngineEntity> observer;
+    Observer<WorldEntity> observer;
     void notifyObserver();  // Notify observer about the position change
 };
 }

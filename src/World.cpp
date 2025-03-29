@@ -1,36 +1,36 @@
-#include "Area2D.h"
+#include "World.h"
 
 #include <iostream>
 
 namespace FrameworkUser
 {
 
-Area2D::Area2D(Point2D lowerRight) : lowerRight(lowerRight), stopFlag(false), isTesting(false) {}
+World::World(Point2D lowerRight) : lowerRight(lowerRight), stopFlag(false), isTesting(false) {}
 
-Area2D::~Area2D()
+World::~World()
 {
     stopRandomMovements(); // Ensure thread is stopped before destruction
 }
 
-void Area2D::addEntity(std::unique_ptr<EngineEntity>&& entity)
+void World::addEntity(std::unique_ptr<WorldEntity>&& entity)
 {
     // Register EntityCache as an observer for the newly added entity
     entity->addObserver(&entityCache);
     entityCache.addEntity(std::move(entity), entity->getPosition(), entity->getId());
 }
 
-void Area2D::clear()
+void World::clear()
 {
     entityCache.clear();
 }
 
-void Area2D::startRandomMovements()
+void World::startRandomMovements()
 {
     stopFlag = false;
-    movementThread = std::thread(&Area2D::randomMovementLoop, this);
+    movementThread = std::thread(&World::randomMovementLoop, this);
 }
 
-void Area2D::stopRandomMovements()
+void World::stopRandomMovements()
 {
     stopFlag = true;
     if (movementThread.joinable()) {
@@ -38,48 +38,48 @@ void Area2D::stopRandomMovements()
     }
 }
 
-double Area2D::getWidth()
+double World::getWidth()
 {
     return lowerRight.getX();
 }
 
-double Area2D::getHeight()
+double World::getHeight()
 {
     return lowerRight.getY();
 }
 
-void Area2D::setTestingStatus(bool status)
+void World::setTestingStatus(bool status)
 {
     isTesting = status;
 }
 
-void Area2D::addNEntities(int n)
+void World::addNEntities(int n)
 {
     for (int i = 0; i < n; ++i)
     {
         int randomX = std::rand() % (int)getWidth();
         int randomY = std::rand() % (int)getHeight();
-        addEntity(std::unique_ptr<EngineEntity>(new EngineEntity(Point2D(randomX, randomY), nextId++)));
+        addEntity(std::unique_ptr<WorldEntity>(new WorldEntity(Point2D(randomX, randomY), nextId++)));
     }
 }
 
-void Area2D::getAllEntities(std::function<void(EntityView<EngineEntity>& safeView)> consumer) {
+void World::getAllEntities(std::function<void(EntityView<WorldEntity>& safeView)> consumer) {
     entityCache.getAllEntities(consumer);
 }
 
-void Area2D::selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityView<EngineEntity>& safeView)> consumer)
+void World::selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityView<WorldEntity>& safeView)> consumer)
 {
     entityCache.selectArea(boundingBox, consumer);
 }
 
-bool Area2D::isValidEntity(int id) {
+bool World::isValidEntity(int id) {
     return entityCache.isValidEntity(id);
 }
 
-EngineEntity& Area2D::getEntityById(int id) {
+WorldEntity& World::getEntityById(int id) {
     return entityCache.getEntityById(id).getEntity();
 }
-void Area2D::randomMovementLoop() // Simulate movement of entities
+void World::randomMovementLoop() // Simulate movement of entities
 {
     // Random number generator setup
     std::random_device rd; // Seed generator
@@ -94,8 +94,8 @@ void Area2D::randomMovementLoop() // Simulate movement of entities
     while (!stopFlag) {
         if (!isTesting)
         {
-            entityCache.getAllEntities([&](EntityView<EngineEntity>& safeView) {
-                EngineEntity& entity = safeView.getHandle()->getEntity();
+            entityCache.getAllEntities([&](EntityView<WorldEntity>& safeView) {
+                WorldEntity& entity = safeView.getHandle()->getEntity();
                 if (moveChance(gen) < 0.1) // 10% chance to move
                 {
                     Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
@@ -109,7 +109,7 @@ void Area2D::randomMovementLoop() // Simulate movement of entities
     }
 }
 
-void Area2D::shuffleEntityPositions()
+void World::shuffleEntityPositions()
 {
     if (entityCache.entityCount() == 0) return;
 
@@ -120,8 +120,8 @@ void Area2D::shuffleEntityPositions()
     std::uniform_int_distribution<> posYDistribution(0, std::floor(lowerRight.getY()) - 1);
 
     // Shuffle all entity positions
-    entityCache.getAllEntities([&](EntityView<EngineEntity>& safeView) {
-        EngineEntity& entity = safeView.getHandle()->getEntity();
+    entityCache.getAllEntities([&](EntityView<WorldEntity>& safeView) {
+        WorldEntity& entity = safeView.getHandle()->getEntity();
         Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
         entity.updatePosition(newPosition);
     });
