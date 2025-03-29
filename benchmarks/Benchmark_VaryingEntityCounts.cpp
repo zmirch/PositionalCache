@@ -1,7 +1,7 @@
 #include <benchmark/benchmark.h>
 #include "../src/Area2D.h"
 
-using namespace Engine;
+using namespace FrameworkUser;
 
 std::vector<EntityHandle<EngineEntity>> selectedEntities;
 int WIDTH = 1280, HEIGHT = 800;

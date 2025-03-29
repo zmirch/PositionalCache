@@ -9,7 +9,7 @@
 #include "Bounds.h"
 #include "Button.h"
 
-namespace Engine
+namespace FrameworkUser
 {
 
 int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 4;
@@ -188,7 +188,7 @@ void Draw()
 }
 }
 
-using namespace Engine;
+using namespace FrameworkUser;
 
 int main()
 {

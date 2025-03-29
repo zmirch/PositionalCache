@@ -4,7 +4,7 @@
 
 using namespace PositionalCache;
 
-namespace Engine
+namespace FrameworkUser
 {
 EngineEntity::EngineEntity(Point2D position, int id)
 : observer(nullptr), id(id), color(EntityColor::Blue)

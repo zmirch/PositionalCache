@@ -11,7 +11,7 @@
 
 using namespace PositionalCache;
 
-namespace Engine
+namespace FrameworkUser
 {
 
 class Area2D

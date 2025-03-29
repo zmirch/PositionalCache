@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace Engine
+namespace FrameworkUser
 {
 
 Area2D::Area2D(Point2D lowerRight) : lowerRight(lowerRight), stopFlag(false), isTesting(false) {}

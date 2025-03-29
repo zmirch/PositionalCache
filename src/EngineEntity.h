@@ -4,7 +4,7 @@
 #include "Point2D.h"
 using namespace PositionalCache;
 
-namespace Engine
+namespace FrameworkUser
 {
 enum class EntityColor {
     Red,
