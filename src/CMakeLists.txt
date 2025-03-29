@@ -1,8 +1,8 @@
 add_executable(PositionalCache
         main.cpp
-        Area2D.cpp
+        World.cpp
         Bounds.cpp
-        EngineEntity.cpp
+        WorldEntity.cpp
         Error.h
         Point2D.cpp
         Button.cpp

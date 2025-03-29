@@ -1,4 +1,4 @@
-#include "Area2D.h"
+#include "World.h"
 #include <iostream>
 #include <cstdlib> // For rand()
 #include <ctime>   // For time()
@@ -9,14 +9,14 @@
 #include "Bounds.h"
 #include "Button.h"
 
-namespace Engine
+namespace FrameworkUser
 {
 
 int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 4;
 
-Area2D area(Point2D(WIDTH, HEIGHT));
+World area(Point2D(WIDTH, HEIGHT));
 
-std::vector<EntityHandle<EngineEntity>> selectedEntities;
+std::vector<EntityHandle<WorldEntity>> selectedEntities;
 Point2D selectionPointA;
 Point2D selectionPointB;
 Rectangle selectionRectangle;
@@ -44,7 +44,7 @@ void ColorSelection(EntityColor color)
 
 void squareSelection(PositionalCache::Bounds boundingBox) {
 	selectedEntities.clear();
-	area.selectArea(boundingBox, [&](EntityView<EngineEntity>& safeView) {
+	area.selectArea(boundingBox, [&](EntityView<WorldEntity>& safeView) {
 		selectedEntities.push_back(safeView.getHandle());
 	});
 }
@@ -128,7 +128,7 @@ void Update()
 	}
 }
 
-void DrawEntity(const EngineEntity& entity)
+void DrawEntity(const WorldEntity& entity)
 {
 	Point2D entityPosition = entity.getPosition();
 	EntityColor entityColor = entity.getColor();
@@ -157,12 +157,12 @@ void Draw()
 	{
 		if(entity->hasEntity())
 		{
-			EngineEntity& selectedEntity = entity->getEntity();
+			WorldEntity& selectedEntity = entity->getEntity();
 			DrawCircle(selectedEntity.getPosition().getX(), selectedEntity.getPosition().getY(), CIRCLERADIUS + 2, WHITE);
 		}
 	}
 
-	area.getAllEntities([&](EntityView<EngineEntity>& safeView) {
+	area.getAllEntities([&](EntityView<WorldEntity>& safeView) {
 		DrawEntity(safeView.getEntity());
 	});
 
@@ -188,7 +188,7 @@ void Draw()
 }
 }
 
-using namespace Engine;
+using namespace FrameworkUser;
 
 int main()
 {

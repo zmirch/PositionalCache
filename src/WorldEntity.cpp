@@ -1,49 +1,49 @@
-#include "EngineEntity.h"
+#include "WorldEntity.h"
 
 #include <iostream>
 
 using namespace PositionalCache;
 
-namespace Engine
+namespace FrameworkUser
 {
-EngineEntity::EngineEntity(Point2D position, int id)
+WorldEntity::WorldEntity(Point2D position, int id)
 : observer(nullptr), id(id), color(EntityColor::Blue)
 {
     coordinates.setX(position.getX());
     coordinates.setY(position.getY());
 }
 
-void EngineEntity::setColor(EntityColor color)
+void WorldEntity::setColor(EntityColor color)
 {
     this->color = color;
 }
 
-EntityColor EngineEntity::getColor() const
+EntityColor WorldEntity::getColor() const
 {
     return color;
 }
 
-void EngineEntity::updatePosition(Point2D newCoordinates)
+void WorldEntity::updatePosition(Point2D newCoordinates)
 {
     coordinates.setX(newCoordinates.getX());
     coordinates.setY(newCoordinates.getY());
     notifyObserver();  // Notify observers whenever position changes
 }
 
-Point2D EngineEntity::getPosition() const
+Point2D WorldEntity::getPosition() const
 {
     return coordinates;
 }
 
-void EngineEntity::addObserver(Observer<EngineEntity>&& observer) {
+void WorldEntity::addObserver(Observer<WorldEntity>&& observer) {
     this->observer = observer;
 }
 
-void EngineEntity::notifyObserver() {
+void WorldEntity::notifyObserver() {
     observer.onPositionChanged(this->id, this->coordinates);
 }
 
-int EngineEntity::getId() const
+int WorldEntity::getId() const
 {
     return id;
 }
