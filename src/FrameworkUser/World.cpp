@@ -1,7 +1,5 @@
 #include "World.h"
 
-#include <iostream>
-
 namespace FrameworkUser
 {
 

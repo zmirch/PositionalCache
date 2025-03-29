@@ -1,5 +1,4 @@
 #include "WorldEntity.h"
-
 #include <iostream>
 
 using namespace PositionalCache;

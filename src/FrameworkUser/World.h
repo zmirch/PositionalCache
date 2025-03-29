@@ -5,9 +5,9 @@
 #include <random>
 
 #include "WorldEntity.h"
-#include "Point2D.h"
-#include "Cache.h"
-#include "Bounds.h"
+#include "../Framework/Point2D.h"
+#include "../Framework/Cache.h"
+#include "../Framework/Bounds.h"
 
 using namespace PositionalCache;
 
