@@ -8,6 +8,8 @@
 #include "../Framework/Point2D.h"
 #include "../Framework/Cache.h"
 #include "../Framework/Bounds.h"
+#include "../Framework/Algorithms/BasicAlgorithm.h"
+#include "../Framework/Algorithms/VectorAlgorithm.h"
 
 using namespace PositionalCache;
 
@@ -21,7 +23,7 @@ public:
 	~World();
 
 	std::deque<WorldEntity> getEntities();
-	void addEntity(std::unique_ptr<WorldEntity>&& entity);
+	void addEntity(std::unique_ptr<WorldEntity>&& entity, const Point2D& position);
 	void clear();
 	void startRandomMovements();
 	void stopRandomMovements();
@@ -37,7 +39,7 @@ public:
 
 	WorldEntity& getEntityById(int id);
 private:
-	Cache<WorldEntity> entityCache;
+	Cache<WorldEntity, BasicAlgorithm<WorldEntity>> entityCache;
 	int nextId = 0;
 	void randomMovementLoop();
 	Point2D lowerRight; // Coordinates for the lower right corner of the 2D area

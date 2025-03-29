@@ -128,10 +128,10 @@ void Update()
 	}
 }
 
-void DrawEntity(const WorldEntity& entity)
+void DrawEntity(const EntityView<WorldEntity>& safeView)
 {
-	Point2D entityPosition = entity.getPosition();
-	EntityColor entityColor = entity.getColor();
+	Point2D entityPosition = safeView.getEntity().getPosition();
+	EntityColor entityColor = safeView.getEntity().getEntity().getColor(); // TODO second getEntity rename
 	Color drawColor = WHITE;
 	switch (entityColor) {
 	case EntityColor::Red:
@@ -157,13 +157,12 @@ void Draw()
 	{
 		if(entity->hasEntity())
 		{
-			WorldEntity& selectedEntity = entity->getEntity();
-			DrawCircle(selectedEntity.getPosition().getX(), selectedEntity.getPosition().getY(), CIRCLERADIUS + 2, WHITE);
+			DrawCircle(entity->getPosition().getX(), entity->getPosition().getY(), CIRCLERADIUS + 2, WHITE);
 		}
 	}
 
 	area.getAllEntities([&](EntityView<WorldEntity>& safeView) {
-		DrawEntity(safeView.getEntity());
+		DrawEntity(safeView);
 	});
 
 	DrawRectangleLinesEx(selectionRectangle, 1, LIGHTGRAY);

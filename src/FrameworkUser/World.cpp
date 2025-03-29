@@ -10,11 +10,9 @@ World::~World()
     stopRandomMovements(); // Ensure thread is stopped before destruction
 }
 
-void World::addEntity(std::unique_ptr<WorldEntity>&& entity)
+void World::addEntity(std::unique_ptr<WorldEntity>&& entity, const Point2D& position)
 {
-    // Register EntityCache as an observer for the newly added entity
-    entity->addObserver(&entityCache);
-    entityCache.addEntity(std::move(entity), entity->getPosition(), entity->getId());
+    entityCache.addEntity(std::move(entity), position, entity->getId());
 }
 
 void World::clear()
@@ -57,7 +55,7 @@ void World::addNEntities(int n)
     {
         int randomX = std::rand() % (int)getWidth();
         int randomY = std::rand() % (int)getHeight();
-        addEntity(std::unique_ptr<WorldEntity>(new WorldEntity(Point2D(randomX, randomY), nextId++)));
+        addEntity(std::unique_ptr<WorldEntity>(new WorldEntity(nextId++)), Point2D(randomX, randomY));
     }
 }
 
@@ -93,11 +91,10 @@ void World::randomMovementLoop() // Simulate movement of entities
         if (!isTesting)
         {
             entityCache.getAllEntities([&](EntityView<WorldEntity>& safeView) {
-                WorldEntity& entity = safeView.getHandle()->getEntity();
                 if (moveChance(gen) < 0.1) // 10% chance to move
                 {
                     Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
-                    entity.updatePosition(newPosition);
+                    safeView.getEntity().updatePosition(newPosition);
                 }
             });
         }
@@ -119,9 +116,8 @@ void World::shuffleEntityPositions()
 
     // Shuffle all entity positions
     entityCache.getAllEntities([&](EntityView<WorldEntity>& safeView) {
-        WorldEntity& entity = safeView.getHandle()->getEntity();
         Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
-        entity.updatePosition(newPosition);
+        safeView.getEntity().updatePosition(newPosition);
     });
 }
 

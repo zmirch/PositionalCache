@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include "Point2D.h"
 
 namespace PositionalCache
 {
@@ -25,6 +26,17 @@ public:
 	int getId()
 	{
 		return id;
+	}
+
+	void updatePosition(Point2D newCoordinates)
+	{
+		position.setX(newCoordinates.getX());
+		position.setY(newCoordinates.getY());
+	}
+
+	Point2D getPosition() const
+	{
+		return position;
 	}
 
 	struct Compare
@@ -60,6 +72,7 @@ public:
 
 private:
 	E* engineEntityPtr = nullptr;
+	Point2D position;
 	int id;
 };
 }

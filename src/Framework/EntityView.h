@@ -16,9 +16,9 @@ public:
         return std::move(result); // std::move so we don't make a copy
     }
 
-    E& getEntity()
+    Entity<E>& getEntity() const
     {
-        return entityPtr->get()->getEntity();
+        return *entityPtr->get();
     }
 
     EntityView(const EntityView &other) = delete;
