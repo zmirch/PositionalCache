@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Cache.h"
-#include "Point2D.h"
+#include "../Framework/Cache.h"
+#include "../Framework/Point2D.h"
 using namespace PositionalCache;
 
 namespace FrameworkUser

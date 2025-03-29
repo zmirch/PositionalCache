@@ -1,16 +1,14 @@
 add_executable(PositionalCache
-        main.cpp
-        World.cpp
-        Bounds.cpp
-        WorldEntity.cpp
-        Error.h
-        Point2D.cpp
-        Button.cpp
-        Button.h
-        EntityHandle.cpp
-        EntityHandle.h
-        EntityView.cpp
-        EntityView.h
+        FrameworkUser/Main.cpp
+        FrameworkUser/World.cpp
+        Framework/Bounds.cpp
+        FrameworkUser/WorldEntity.cpp
+        Framework/Error.h
+        Framework/Point2D.cpp
+        FrameworkUser/Button.cpp
+        FrameworkUser/Button.h
+        Framework/EntityHandle.h
+        Framework/EntityView.h
 )
 
 # Link Raylib to the executable
