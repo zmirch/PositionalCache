@@ -18,9 +18,9 @@ public:
     {
         Error::ASSERT(entitiesMap.find(id) == entitiesMap.end(), "Entity has already been added.");
         // TODO rename these
-        Entity<E> newHandle (std::move(entity), id);
+        Entity<E> newHandle (std::move(entity), id, position);
         std::shared_ptr<Entity<E>> newEntity = std::make_shared<Entity<E>>(std::move(newHandle));
-        std::pair<std::shared_ptr<Entity<E>>, Point2D> newPair (std::move(newEntity), position);
+        std::shared_ptr<Entity<E>> newPair (std::move(newEntity));
 
         entitiesMap.emplace(id, std::move(newPair));
     }
@@ -35,27 +35,27 @@ public:
     void selectArea(const PositionalCache::Bounds& boundingBox,
                 std::function<void(EntityView<E>& handle)> consumer)
     {
-        for (auto& [entityId, pair] : entitiesMap)
+        for (auto& [entityId, entity] : entitiesMap)
         {
-            Error::ASSERT(pair.first->hasEntity(), "Handle doesn't have an entity.");
-            if (boundingBox.containsPosition(pair.second))
+            Error::ASSERT(entity->hasEntity(), "Handle doesn't have an entity.");
+            if (boundingBox.containsPosition(entity->getPosition()))
             {
-                EntityView<E> safeView(pair.first);
+                EntityView<E> safeView(entity);
                 consumer(safeView);
             }
         }
     }
     void getAllEntities(std::function<void(EntityView<E>& view)> consumer)
     {
-        for (auto& [entryId, pair] : entitiesMap) {
-            auto copyOfShared = pair.first;
+        for (auto& [entityId, entity] : entitiesMap) {
+            auto copyOfShared = entity;
             EntityView<E> safeView(copyOfShared);
             consumer(safeView);
         }
     }
     Entity<E>& getEntityById(int id)
     {
-        return *entitiesMap.at(id).first.get();
+        return *entitiesMap.at(id).get();
     }
     bool contains(int id)
     {
@@ -66,6 +66,6 @@ public:
         entitiesMap.clear();
     }
 private:
-    std::unordered_map <int, std::pair<std::shared_ptr<PositionalCache::Entity<E>>, Point2D>> entitiesMap{};
+    std::unordered_map <int, std::shared_ptr<PositionalCache::Entity<E>>> entitiesMap{};
 };
 }

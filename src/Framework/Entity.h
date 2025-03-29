@@ -10,8 +10,8 @@ template <typename E>
 class Entity
 {
 public:
-	Entity(std::unique_ptr<E>&& entity, int id)
-		: engineEntityPtr(entity.release()), id(id){}
+	Entity(std::unique_ptr<E>&& entity, int id, const Point2D& position)
+		: engineEntityPtr(entity.release()), id(id), position(position) {}
 
 	E& getEntity()
 	{
