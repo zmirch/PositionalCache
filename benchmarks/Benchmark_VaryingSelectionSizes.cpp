@@ -1,9 +1,9 @@
 #include <benchmark/benchmark.h>
-#include "../src/Area2D.h"
+#include "../src/World.h"
 
 using namespace FrameworkUser;
 
-std::vector<EntityHandle<EngineEntity>> selectedEntities;
+std::vector<EntityHandle<WorldEntity>> selectedEntities;
 int WIDTH = 1280, HEIGHT = 800;
 
 static void BM_SquareSelection_VaryingSelectionSizes(benchmark::State& state) {
@@ -12,7 +12,7 @@ static void BM_SquareSelection_VaryingSelectionSizes(benchmark::State& state) {
     int entityCount = 100000;  // Fixed entity count
 
     // Set up testing environment
-    Area2D area(Point2D(WIDTH, HEIGHT));
+    World area(Point2D(WIDTH, HEIGHT));
     area.clear();
     area.addNEntities(entityCount);
 
@@ -24,7 +24,7 @@ static void BM_SquareSelection_VaryingSelectionSizes(benchmark::State& state) {
         area.shuffleEntityPositions();  // Shuffle entities before each iteration
         state.ResumeTiming();
 
-        area.selectArea(testBounds, [&](EntityView<EngineEntity>& safeView) {
+        area.selectArea(testBounds, [&](EntityView<WorldEntity>& safeView) {
             selectedEntities.push_back(safeView.getHandle());
         });
         benchmark::DoNotOptimize(selectedEntities);
