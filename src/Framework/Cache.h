@@ -14,8 +14,6 @@
 
 namespace PositionalCache
 {
-template <typename E, typename Algorithm>
-class Observer;
 
 template <typename E, typename Algorithm>
 class Cache {
@@ -35,27 +33,10 @@ public:
         return algorithm.getEntityCount();
     }
 
-    void updateEntityPosition(int id, const Point2D& position)
-    {
-        //Error::ASSERT(entitiesMap.find(id) != entitiesMap.end(), "Couldn't find entity.");
-        Error::ASSERT(algorithm.contains(id), "Couldn't find entity.");
-        Entity<E>& res = algorithm.getEntityById(id);
-        res.updatePosition(position);
-    }
-
     void selectArea(const PositionalCache::Bounds& boundingBox,
                 std::function<void(EntityView<E>& handle)> consumer)
     {
         algorithm.selectArea(boundingBox, consumer);
-    }
-
-    Observer<E, Algorithm> createObserver() {
-        return { this };
-    }
-
-    void onPositionChanged(int id, const Point2D& position)
-    {
-        updateEntityPosition(id, position);
     }
 
     void getAllEntities(std::function<void(EntityView<E>& view)> consumer) {
@@ -82,20 +63,4 @@ private:
 
 };
 
-template <typename E, typename Algorithm>
-class Observer {
-    Cache<E, Algorithm>* cache{ nullptr };
-
-public:
-    Observer(Cache<E, Algorithm>* cache) : cache(cache) {}
-
-    void onPositionChanged(int id, Point2D position) {
-        Error::ASSERT(cache, "Invalid state.");
-        cache->onPositionChanged(id, position);
-    }
-
-    bool isActive() {
-        return cache;
-    }
-};
 }

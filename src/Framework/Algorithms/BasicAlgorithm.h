@@ -20,9 +20,7 @@ public:
         // TODO rename these
         Entity<E> newHandle (std::move(entity), id, position);
         std::shared_ptr<Entity<E>> newEntity = std::make_shared<Entity<E>>(std::move(newHandle));
-        std::shared_ptr<Entity<E>> newPair (std::move(newEntity));
-
-        entitiesMap.emplace(id, std::move(newPair));
+        entitiesMap.emplace(id, std::move(newEntity));
     }
     void removeEntityById(int id)
     {

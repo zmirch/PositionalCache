@@ -61,11 +61,13 @@ public:
 	Entity(Entity&& other) noexcept {
 		engineEntityPtr = other.engineEntityPtr;
 		id = other.id;
+		position = other.position;
 		other.engineEntityPtr = nullptr;
 	}
 	Entity& operator=(Entity&& other) noexcept {
 		engineEntityPtr = other.engineEntityPtr;
 		id = other.id;
+		position = other.position;
 		other.engineEntityPtr = nullptr;
 		return *this;
 	}
