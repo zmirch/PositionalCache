@@ -16,13 +16,7 @@ namespace FrameworkUser
 
 int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 4;
 
-using WorldVector = World<Cache<WorldEntity, VectorAlgorithm<WorldEntity>>>;
-using WorldBasic = World<Cache<WorldEntity, BasicAlgorithm<WorldEntity>>>;
-// WorldQuadtree etc
-// std::variant<WorldVector, WorldBasic> activeWorld;
-// std::variant<WorldVector, WorldBasic> activeWorld{WorldBasic(Point2D(WIDTH, HEIGHT))};
-	std::variant<WorldVector, WorldBasic> activeWorld = WorldBasic(Point2D(WIDTH, HEIGHT));
-// std::variant<WorldVector, WorldBasic> activeWorld{std::in_place_type<WorldBasic>, Point2D(WIDTH, HEIGHT)};
+World world(Point2D(WIDTH, HEIGHT));
 
 std::vector<EntityHandle<WorldEntity>> selectedEntities;
 Point2D selectionPointA;
@@ -38,21 +32,12 @@ Button add1000EntitiesButton = Button(Vector2{ static_cast<float>(120), static_c
 Button add10KEntitiesButton = Button(Vector2{ static_cast<float>(160), static_cast<float>(70) }, 20, 20, LIGHTGRAY);
 Button worldVectorButton = Button(Vector2{ static_cast<float>(WIDTH) - 180, static_cast<float>(30) }, 20, 20, LIGHTGRAY);
 Button worldBasicButton = Button(Vector2{ static_cast<float>(WIDTH) - 120, static_cast<float>(30) }, 20, 20, LIGHTGRAY);
-
-// Invokes the provided callable with the currently active World instance held by the variant.
-template<typename Func>
-decltype(auto) withActiveWorld(Func&& f)
-{
-	return std::visit(std::forward<Func>(f), activeWorld);
-}
+const char* currentAlgorithmText = nullptr;
 
 void ClearEntities()
 {
 	selectedEntities.clear();
-	withActiveWorld([](auto& world)
-	{
-		world.clear();
-	});
+	world.clear();
 }
 
 void ColorSelection(EntityColor color)
@@ -68,22 +53,16 @@ void ColorSelection(EntityColor color)
 
 void squareSelection(PositionalCache::Bounds boundingBox) {
 	selectedEntities.clear();
-	withActiveWorld([&](auto& world)
+	world.selectArea(boundingBox, [&](EntityView<WorldEntity>& safeView)
 	{
-		world.selectArea(boundingBox, [&](EntityView<WorldEntity>& safeView)
-		{
-			selectedEntities.push_back(safeView.getHandle());
-		});
+		selectedEntities.push_back(safeView.getHandle());
 	});
 }
 
-
 void Update()
 {
-	if (withActiveWorld([](auto& world){return world.isTesting; }))
-	{
+	if (world.isTesting)
 		return;
-	};
 
 	if (IsKeyPressed(KEY_C))
 	{
@@ -95,7 +74,6 @@ void Update()
 	{
 		Vector2 mousePosition = GetMousePosition();
 
-		// Update selection start point
 		selectionPointA.setX(mousePosition.x);
 		selectionPointA.setY(mousePosition.y);
 		selectionRectangle.x = mousePosition.x;
@@ -122,43 +100,39 @@ void Update()
 		}
 		else if (add10EntitiesButton.isPressed(mousePosition, true))
 		{
-			withActiveWorld([](auto& world)
-			{
-				world.addNEntities(10);
-			});
+			world.addNEntities(10);
 		}
 		else if (add100EntitiesButton.isPressed(mousePosition, true))
 		{
-			withActiveWorld([](auto& world)
-			{
-				world.addNEntities(100);
-			});
+			world.addNEntities(100);
 		}
 		else if (add1000EntitiesButton.isPressed(mousePosition, true))
 		{
-			withActiveWorld([](auto& world)
-			{
-				world.addNEntities(1000);
-			});
+			world.addNEntities(1000);
 		}
 		else if (add10KEntitiesButton.isPressed(mousePosition, true))
 		{
-			withActiveWorld([](auto& world)
-			{
-				world.addNEntities(10000);
-			});
+			world.addNEntities(10000);
 		}
 		else if (worldVectorButton.isPressed(mousePosition, true))
 		{
-			ClearEntities();
-			activeWorld = WorldVector(Point2D(WIDTH, HEIGHT));  // Switch to WorldVector
-			std::visit([](auto& world) { world.startRandomMovements(); }, activeWorld);
+			if (world.getCurrentCacheType() != CacheType::Vector)
+			{
+				ClearEntities();
+				world.setCacheType(CacheType::Vector);
+				currentAlgorithmText = "Vector";
+				world.startRandomMovements();
+			}
 		}
 		else if (worldBasicButton.isPressed(mousePosition, true))
 		{
-			ClearEntities();
-			activeWorld = WorldBasic(Point2D(WIDTH, HEIGHT));  // Switch to WorldBasic
-			std::visit([](auto& world) { world.startRandomMovements(); }, activeWorld);
+			if (world.getCurrentCacheType() != CacheType::Basic)
+			{
+				ClearEntities();
+				world.setCacheType(CacheType::Basic);
+				currentAlgorithmText = "Map";
+				world.startRandomMovements();
+			}
 		}
 		else
 		{
@@ -210,12 +184,9 @@ void Draw()
 		}
 	}
 
-	withActiveWorld([](auto& world)
+	world.getAllEntities([&](EntityView<WorldEntity>& safeView)
 	{
-		world.getAllEntities([&](EntityView<WorldEntity>& safeView)
-		{
-			DrawEntity(safeView);
-		});
+		DrawEntity(safeView);
 	});
 
 	DrawRectangleLinesEx(selectionRectangle, 1, LIGHTGRAY);
@@ -231,6 +202,7 @@ void Draw()
 	DrawText("Vector", static_cast<float>(WIDTH) - 200, 53, 17, WHITE);
 	DrawText("Map", static_cast<float>(WIDTH) - 120, 53, 17, WHITE);
 	DrawText("Cache Algorithms", static_cast<float>(WIDTH) - 200, 5, 17, WHITE);
+	DrawText(TextFormat("Current: %s", currentAlgorithmText), WIDTH - 200, 70, 17, YELLOW);
 
 	blueButton.Draw();
 	greenButton.Draw();
@@ -254,9 +226,9 @@ int main()
 	SetTargetFPS(60);
 
 	std::srand(static_cast<unsigned>(std::time(0)));
+	currentAlgorithmText = (world.getCurrentCacheType() == FrameworkUser::CacheType::Vector) ? "Vector" : "Map";
 
-	activeWorld.emplace<WorldBasic>(Point2D(WIDTH, HEIGHT));
-	std::visit([](auto& world) { world.startRandomMovements(); }, activeWorld);
+	world.startRandomMovements();
 
 	while (!WindowShouldClose())
 	{
