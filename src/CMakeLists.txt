@@ -10,7 +10,6 @@ add_executable(PositionalCache
         Framework/EntityHandle.h
         Framework/EntityView.h
         Framework/Algorithms/BasicAlgorithm.h
-        Framework/Algorithms/VectorAlgorithm.cpp
         Framework/Algorithms/VectorAlgorithm.h
 )
 

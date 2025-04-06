@@ -3,8 +3,10 @@
 #include <cstdlib> // For rand()
 #include <ctime>   // For time()
 #include <algorithm> // For std::min
+#include <optional>
 
 #include <raylib.h>
+#include <variant>
 
 #include "../Framework/Bounds.h"
 #include "Button.h"
@@ -14,7 +16,13 @@ namespace FrameworkUser
 
 int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 4;
 
-World area(Point2D(WIDTH, HEIGHT));
+using WorldVector = World<Cache<WorldEntity, VectorAlgorithm<WorldEntity>>>;
+using WorldBasic = World<Cache<WorldEntity, BasicAlgorithm<WorldEntity>>>;
+// WorldQuadtree etc
+// std::variant<WorldVector, WorldBasic> activeWorld;
+// std::variant<WorldVector, WorldBasic> activeWorld{WorldBasic(Point2D(WIDTH, HEIGHT))};
+	std::variant<WorldVector, WorldBasic> activeWorld = WorldBasic(Point2D(WIDTH, HEIGHT));
+// std::variant<WorldVector, WorldBasic> activeWorld{std::in_place_type<WorldBasic>, Point2D(WIDTH, HEIGHT)};
 
 std::vector<EntityHandle<WorldEntity>> selectedEntities;
 Point2D selectionPointA;
@@ -28,8 +36,24 @@ Button add10EntitiesButton = Button(Vector2{ static_cast<float>(40), static_cast
 Button add100EntitiesButton = Button(Vector2{ static_cast<float>(80), static_cast<float>(70) }, 20, 20, LIGHTGRAY);
 Button add1000EntitiesButton = Button(Vector2{ static_cast<float>(120), static_cast<float>(70) }, 20, 20, LIGHTGRAY);
 Button add10KEntitiesButton = Button(Vector2{ static_cast<float>(160), static_cast<float>(70) }, 20, 20, LIGHTGRAY);
+Button worldVectorButton = Button(Vector2{ static_cast<float>(WIDTH) - 180, static_cast<float>(30) }, 20, 20, LIGHTGRAY);
+Button worldBasicButton = Button(Vector2{ static_cast<float>(WIDTH) - 120, static_cast<float>(30) }, 20, 20, LIGHTGRAY);
 
-const int SELECTION_TIMER{ 0 };
+// Invokes the provided callable with the currently active World instance held by the variant.
+template<typename Func>
+decltype(auto) withActiveWorld(Func&& f)
+{
+	return std::visit(std::forward<Func>(f), activeWorld);
+}
+
+void ClearEntities()
+{
+	selectedEntities.clear();
+	withActiveWorld([](auto& world)
+	{
+		world.clear();
+	});
+}
 
 void ColorSelection(EntityColor color)
 {
@@ -44,20 +68,26 @@ void ColorSelection(EntityColor color)
 
 void squareSelection(PositionalCache::Bounds boundingBox) {
 	selectedEntities.clear();
-	area.selectArea(boundingBox, [&](EntityView<WorldEntity>& safeView) {
-		selectedEntities.push_back(safeView.getHandle());
+	withActiveWorld([&](auto& world)
+	{
+		world.selectArea(boundingBox, [&](EntityView<WorldEntity>& safeView)
+		{
+			selectedEntities.push_back(safeView.getHandle());
+		});
 	});
 }
 
+
 void Update()
 {
-	if (area.isTesting) {  // If benchmark is running, skip interactive actions
+	if (withActiveWorld([](auto& world){return world.isTesting; }))
+	{
 		return;
-	}
+	};
 
 	if (IsKeyPressed(KEY_C))
 	{
-		area.clear();
+		ClearEntities();
 		selectedEntities.clear();
 	}
 
@@ -68,7 +98,6 @@ void Update()
 		// Update selection start point
 		selectionPointA.setX(mousePosition.x);
 		selectionPointA.setY(mousePosition.y);
-
 		selectionRectangle.x = mousePosition.x;
 		selectionRectangle.y = mousePosition.y;
 		selectionRectangle.width = 0;
@@ -79,7 +108,6 @@ void Update()
 	{
 		Vector2 mousePosition = GetMousePosition();
 
-		// Check if the mouse clicked the button
 		if (blueButton.isPressed(mousePosition, true))
 		{
 			ColorSelection(EntityColor::Blue);
@@ -94,19 +122,43 @@ void Update()
 		}
 		else if (add10EntitiesButton.isPressed(mousePosition, true))
 		{
-			area.addNEntities(10);
+			withActiveWorld([](auto& world)
+			{
+				world.addNEntities(10);
+			});
 		}
 		else if (add100EntitiesButton.isPressed(mousePosition, true))
 		{
-			area.addNEntities(100);
+			withActiveWorld([](auto& world)
+			{
+				world.addNEntities(100);
+			});
 		}
 		else if (add1000EntitiesButton.isPressed(mousePosition, true))
 		{
-			area.addNEntities(1000);
+			withActiveWorld([](auto& world)
+			{
+				world.addNEntities(1000);
+			});
 		}
 		else if (add10KEntitiesButton.isPressed(mousePosition, true))
 		{
-			area.addNEntities(10000);
+			withActiveWorld([](auto& world)
+			{
+				world.addNEntities(10000);
+			});
+		}
+		else if (worldVectorButton.isPressed(mousePosition, true))
+		{
+			ClearEntities();
+			activeWorld = WorldVector(Point2D(WIDTH, HEIGHT));  // Switch to WorldVector
+			std::visit([](auto& world) { world.startRandomMovements(); }, activeWorld);
+		}
+		else if (worldBasicButton.isPressed(mousePosition, true))
+		{
+			ClearEntities();
+			activeWorld = WorldBasic(Point2D(WIDTH, HEIGHT));  // Switch to WorldBasic
+			std::visit([](auto& world) { world.startRandomMovements(); }, activeWorld);
 		}
 		else
 		{
@@ -121,9 +173,7 @@ void Update()
 			// Determine width and height of drawn Rectangle
 			selectionRectangle.width = abs(selectionPointA.getX() - selectionPointB.getX());
 			selectionRectangle.height = abs(selectionPointA.getY() - selectionPointB.getY());
-
 			squareSelection(PositionalCache::Bounds(selectionPointA, selectionPointB));
-
 		}
 	}
 }
@@ -145,7 +195,6 @@ void DrawEntity(const EntityView<WorldEntity>& safeView)
 		break;
 	}
 	DrawCircle(entityPosition.getX(), entityPosition.getY(), CIRCLERADIUS, drawColor);
-
 }
 
 void Draw()
@@ -161,8 +210,12 @@ void Draw()
 		}
 	}
 
-	area.getAllEntities([&](EntityView<WorldEntity>& safeView) {
-		DrawEntity(safeView);
+	withActiveWorld([](auto& world)
+	{
+		world.getAllEntities([&](EntityView<WorldEntity>& safeView)
+		{
+			DrawEntity(safeView);
+		});
 	});
 
 	DrawRectangleLinesEx(selectionRectangle, 1, LIGHTGRAY);
@@ -175,6 +228,10 @@ void Draw()
 	DrawText("100", 80, 93, 17, WHITE);
 	DrawText("1000", 120, 93, 17, WHITE);
 	DrawText("10k", 160, 93, 17, WHITE);
+	DrawText("Vector", static_cast<float>(WIDTH) - 200, 53, 17, WHITE);
+	DrawText("Map", static_cast<float>(WIDTH) - 120, 53, 17, WHITE);
+	DrawText("Cache Algorithms", static_cast<float>(WIDTH) - 200, 5, 17, WHITE);
+
 	blueButton.Draw();
 	greenButton.Draw();
 	redButton.Draw();
@@ -182,6 +239,8 @@ void Draw()
 	add100EntitiesButton.Draw();
 	add1000EntitiesButton.Draw();
 	add10KEntitiesButton.Draw();
+	worldVectorButton.Draw();
+	worldBasicButton.Draw();
 
 	EndDrawing();
 }
@@ -191,12 +250,13 @@ using namespace FrameworkUser;
 
 int main()
 {
-	InitWindow(WIDTH, HEIGHT, "Prototype 3");
+	InitWindow(WIDTH, HEIGHT, "Positional Cache Demo");
 	SetTargetFPS(60);
 
 	std::srand(static_cast<unsigned>(std::time(0)));
 
-	area.startRandomMovements();
+	activeWorld.emplace<WorldBasic>(Point2D(WIDTH, HEIGHT));
+	std::visit([](auto& world) { world.startRandomMovements(); }, activeWorld);
 
 	while (!WindowShouldClose())
 	{
