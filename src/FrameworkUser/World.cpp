@@ -18,6 +18,7 @@ void World::setCacheType(CacheType type)
             entityCache = BasicCache();
             break;
     }
+    startRandomMovements();
 }
 
 CacheType World::getCurrentCacheType() const

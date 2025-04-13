@@ -46,8 +46,7 @@ public:
     void getAllEntities(std::function<void(EntityView<E>& view)> consumer)
     {
         for (auto& [entityId, entity] : entitiesMap) {
-            auto copyOfShared = entity;
-            EntityView<E> safeView(copyOfShared);
+            EntityView<E> safeView(entity);
             consumer(safeView);
         }
     }

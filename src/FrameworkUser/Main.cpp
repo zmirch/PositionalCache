@@ -121,7 +121,6 @@ void Update()
 				ClearEntities();
 				world.setCacheType(CacheType::Vector);
 				currentAlgorithmText = "Vector";
-				world.startRandomMovements();
 			}
 		}
 		else if (worldBasicButton.isPressed(mousePosition, true))
@@ -131,7 +130,6 @@ void Update()
 				ClearEntities();
 				world.setCacheType(CacheType::Basic);
 				currentAlgorithmText = "Map";
-				world.startRandomMovements();
 			}
 		}
 		else

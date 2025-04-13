@@ -20,23 +20,26 @@ namespace PositionalCache
             // TODO rename these
             Entity<E> newHandle (std::move(entity), id, position);
             std::shared_ptr<Entity<E>> newEntity = std::make_shared<Entity<E>>(std::move(newHandle));
-            // entitiesMap.emplace(id, std::move(newEntity));
             entitiesMap.emplace(id, newEntity);
-            entitiesVector.emplace_back(newEntity);
+            entitiesDeque.emplace_back(newEntity);
         }
         void removeEntityById(int id)
         {
             entitiesMap.erase(id);
-            entitiesVector.erase(id);
+            auto it = std::remove_if(entitiesDeque.begin(), entitiesDeque.end(),
+            [id](const std::shared_ptr<Entity<E>>& e) {
+                return e->getId() == id;
+            });
+            entitiesDeque.erase(it, entitiesDeque.end());
         }
         int getEntityCount()
         {
-            return entitiesVector.size();
+            return entitiesDeque.size();
         }
         void selectArea(const PositionalCache::Bounds& boundingBox,
                     std::function<void(EntityView<E>& handle)> consumer)
         {
-            for (auto& entity : entitiesVector)
+            for (auto& entity : entitiesDeque)
             {
                 Error::ASSERT(entity->hasEntity(), "Handle doesn't have an entity.");
                 if (boundingBox.containsPosition(entity->getPosition()))
@@ -48,9 +51,9 @@ namespace PositionalCache
         }
         void getAllEntities(std::function<void(EntityView<E>& view)> consumer)
         {
-            for (auto& entity : entitiesVector) {
-                auto copyOfShared = entity;
-                EntityView<E> safeView(copyOfShared);
+            for (auto& entity : entitiesDeque)
+            {
+                EntityView<E> safeView(entity);
                 consumer(safeView);
             }
         }
@@ -65,10 +68,10 @@ namespace PositionalCache
         void clear()
         {
             entitiesMap.clear();
-            entitiesVector.clear();
+            entitiesDeque.clear();
         }
     private:
         std::unordered_map <int, std::shared_ptr<PositionalCache::Entity<E>>> entitiesMap{};
-        std::vector<std::shared_ptr<Entity<E>>> entitiesVector{};
+        std::deque<std::shared_ptr<Entity<E>>> entitiesDeque{};
     };
 }
