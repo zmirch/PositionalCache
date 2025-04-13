@@ -116,11 +116,11 @@ void Update()
 		}
 		else if (worldVectorButton.isPressed(mousePosition, true))
 		{
-			if (world.getCurrentCacheType() != CacheType::Vector)
+			if (world.getCurrentCacheType() != CacheType::Deque)
 			{
 				ClearEntities();
-				world.setCacheType(CacheType::Vector);
-				currentAlgorithmText = "Vector";
+				world.setCacheType(CacheType::Deque);
+				currentAlgorithmText = "Deque";
 			}
 		}
 		else if (worldBasicButton.isPressed(mousePosition, true))
@@ -197,7 +197,7 @@ void Draw()
 	DrawText("100", 80, 93, 17, WHITE);
 	DrawText("1000", 120, 93, 17, WHITE);
 	DrawText("10k", 160, 93, 17, WHITE);
-	DrawText("Vector", static_cast<float>(WIDTH) - 200, 53, 17, WHITE);
+	DrawText("Deque", static_cast<float>(WIDTH) - 200, 53, 17, WHITE);
 	DrawText("Map", static_cast<float>(WIDTH) - 120, 53, 17, WHITE);
 	DrawText("Cache Algorithms", static_cast<float>(WIDTH) - 200, 5, 17, WHITE);
 	DrawText(TextFormat("Current: %s", currentAlgorithmText), WIDTH - 200, 70, 17, YELLOW);
@@ -224,7 +224,7 @@ int main()
 	SetTargetFPS(60);
 
 	std::srand(static_cast<unsigned>(std::time(0)));
-	currentAlgorithmText = (world.getCurrentCacheType() == FrameworkUser::CacheType::Vector) ? "Vector" : "Map";
+	currentAlgorithmText = (world.getCurrentCacheType() == FrameworkUser::CacheType::Deque) ? "Deque" : "Map";
 
 	world.startRandomMovements();
 

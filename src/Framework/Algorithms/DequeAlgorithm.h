@@ -12,7 +12,7 @@ namespace PositionalCache
 {
 
     template <typename E>
-    class VectorAlgorithm {
+    class DequeAlgorithm {
     public:
         void addEntity(std::unique_ptr<E>&& entity, const Point2D& position, int id)
         {

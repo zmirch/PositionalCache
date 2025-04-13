@@ -11,7 +11,7 @@
 #include "../Framework/Cache.h"
 #include "../Framework/Bounds.h"
 #include "../Framework/Algorithms/BasicAlgorithm.h"
-#include "../Framework/Algorithms/VectorAlgorithm.h"
+#include "../Framework/Algorithms/DequeAlgorithm.h"
 
 using namespace PositionalCache;
 
@@ -19,10 +19,10 @@ namespace FrameworkUser
 {
 
 using BasicCache = Cache<WorldEntity, BasicAlgorithm<WorldEntity>>;
-using VectorCache = Cache<WorldEntity, VectorAlgorithm<WorldEntity>>;
-using CacheVariant = std::variant<BasicCache, VectorCache>;
+using DequeCache = Cache<WorldEntity, DequeAlgorithm<WorldEntity>>;
+using CacheVariant = std::variant<BasicCache, DequeCache>;
 
-enum class CacheType { Vector, Basic };
+enum class CacheType { Deque, Basic };
 
 class World
 {

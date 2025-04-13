@@ -3,16 +3,16 @@
 namespace FrameworkUser
 {
 using BasicCache = Cache<WorldEntity, BasicAlgorithm<WorldEntity>>;
-using VectorCache = Cache<WorldEntity, VectorAlgorithm<WorldEntity>>;
-using CacheVariant = std::variant<BasicCache, VectorCache>;
+using DequeCache = Cache<WorldEntity, DequeAlgorithm<WorldEntity>>;
+using CacheVariant = std::variant<BasicCache, DequeCache>;
 
 void World::setCacheType(CacheType type)
 {
     stopRandomMovements(); // Ensure thread is stopped before changing cache
     switch (type)
     {
-        case CacheType::Vector:
-            entityCache = VectorCache();
+        case CacheType::Deque:
+            entityCache = DequeCache();
             break;
         case CacheType::Basic:
             entityCache = BasicCache();
@@ -23,8 +23,8 @@ void World::setCacheType(CacheType type)
 
 CacheType World::getCurrentCacheType() const
 {
-    if (std::holds_alternative<VectorCache>(entityCache))
-        return CacheType::Vector;
+    if (std::holds_alternative<DequeCache>(entityCache))
+        return CacheType::Deque;
     return CacheType::Basic;
 }
 

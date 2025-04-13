@@ -9,7 +9,7 @@ int WIDTH = 1280, HEIGHT = 800;
 
 CacheType intToCacheType(int value) {
     switch (value) {
-        case 0: return CacheType::Vector;
+        case 0: return CacheType::Deque;
         case 1: return CacheType::Basic;
         default: throw std::invalid_argument("Invalid cache type value");
     }
