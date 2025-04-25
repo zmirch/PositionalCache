@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include "Point2D.h"
 
 namespace PositionalCache
 {
@@ -9,8 +10,8 @@ template <typename E>
 class Entity
 {
 public:
-	Entity(std::unique_ptr<E>&& entity, int id)
-		: engineEntityPtr(entity.release()), id(id){}
+	Entity(std::unique_ptr<E>&& entity, int id, const Point2D& position)
+		: engineEntityPtr(entity.release()), id(id), position(position) {}
 
 	E& getEntity()
 	{
@@ -25,6 +26,17 @@ public:
 	int getId()
 	{
 		return id;
+	}
+
+	void updatePosition(Point2D newCoordinates)
+	{
+		position.setX(newCoordinates.getX());
+		position.setY(newCoordinates.getY());
+	}
+
+	Point2D getPosition() const
+	{
+		return position;
 	}
 
 	struct Compare
@@ -49,17 +61,20 @@ public:
 	Entity(Entity&& other) noexcept {
 		engineEntityPtr = other.engineEntityPtr;
 		id = other.id;
+		position = other.position;
 		other.engineEntityPtr = nullptr;
 	}
 	Entity& operator=(Entity&& other) noexcept {
 		engineEntityPtr = other.engineEntityPtr;
 		id = other.id;
+		position = other.position;
 		other.engineEntityPtr = nullptr;
 		return *this;
 	}
 
 private:
 	E* engineEntityPtr = nullptr;
+	Point2D position;
 	int id;
 };
 }

@@ -2,24 +2,77 @@
 
 namespace FrameworkUser
 {
+using BasicCache = Cache<WorldEntity, BasicAlgorithm<WorldEntity>>;
+using DequeCache = Cache<WorldEntity, DequeAlgorithm<WorldEntity>>;
+using CacheVariant = std::variant<BasicCache, DequeCache>;
 
-World::World(Point2D lowerRight) : lowerRight(lowerRight), stopFlag(false), isTesting(false) {}
+void World::setCacheType(CacheType type)
+{
+    stopRandomMovements(); // Ensure thread is stopped before changing cache
+    switch (type)
+    {
+        case CacheType::Deque:
+            entityCache = DequeCache();
+            break;
+        case CacheType::Basic:
+            entityCache = BasicCache();
+            break;
+    }
+    startRandomMovements();
+}
+
+CacheType World::getCurrentCacheType() const
+{
+    if (std::holds_alternative<DequeCache>(entityCache))
+        return CacheType::Deque;
+    return CacheType::Basic;
+}
+
+World::World(Point2D lowerRight)
+    : lowerRight(lowerRight), stopFlag(false), isTesting(false)
+{
+}
+
+World::World(const World& other)
+    : lowerRight(other.lowerRight),
+      entityCache(other.entityCache),
+      nextId(other.nextId),
+      stopFlag(other.stopFlag),
+      isTesting(other.isTesting)
+{
+}
+
+World::World(World&& other) noexcept
+    : lowerRight(std::move(other.lowerRight)),
+      entityCache(std::move(other.entityCache)),
+      nextId(other.nextId),
+      stopFlag(other.stopFlag),
+      isTesting(other.isTesting),
+      movementThread(std::move(other.movementThread))
+{
+    other.nextId = 0;
+    other.stopFlag = true;
+}
 
 World::~World()
 {
-    stopRandomMovements(); // Ensure thread is stopped before destruction
+    stopRandomMovements();
 }
 
-void World::addEntity(std::unique_ptr<WorldEntity>&& entity)
+void World::addEntity(std::unique_ptr<WorldEntity>&& entity, const Point2D& position)
 {
-    // Register EntityCache as an observer for the newly added entity
-    entity->addObserver(&entityCache);
-    entityCache.addEntity(std::move(entity), entity->getPosition(), entity->getId());
+    withEntityCache([&](auto& cache)
+    {
+        cache.addEntity(std::move(entity), position, entity->getId());
+    });
 }
 
 void World::clear()
 {
-    entityCache.clear();
+    withEntityCache([&](auto& cache)
+    {
+        cache.clear();
+    });
 }
 
 void World::startRandomMovements()
@@ -57,72 +110,88 @@ void World::addNEntities(int n)
     {
         int randomX = std::rand() % (int)getWidth();
         int randomY = std::rand() % (int)getHeight();
-        addEntity(std::unique_ptr<WorldEntity>(new WorldEntity(Point2D(randomX, randomY), nextId++)));
+        addEntity(std::unique_ptr<WorldEntity>(new WorldEntity(nextId++)), Point2D(randomX, randomY));
     }
 }
 
-void World::getAllEntities(std::function<void(EntityView<WorldEntity>& safeView)> consumer) {
-    entityCache.getAllEntities(consumer);
-}
-
-void World::selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityView<WorldEntity>& safeView)> consumer)
+void World::getAllEntities(std::function<void(EntityView<WorldEntity>& safeView)> consumer)
 {
-    entityCache.selectArea(boundingBox, consumer);
+    withEntityCache([&](auto& cache)
+    {
+        cache.getAllEntities(consumer);
+    });
 }
 
-bool World::isValidEntity(int id) {
-    return entityCache.isValidEntity(id);
-}
-
-WorldEntity& World::getEntityById(int id) {
-    return entityCache.getEntityById(id).getEntity();
-}
-void World::randomMovementLoop() // Simulate movement of entities
+void World::selectArea(Bounds boundingBox, std::function<void(EntityView<WorldEntity>& safeView)> consumer)
 {
-    // Random number generator setup
-    std::random_device rd; // Seed generator
-    std::mt19937 gen(rd()); // Random number generator
-    std::uniform_real_distribution<> moveChance(0.0, 1.0);
-    std::uniform_int_distribution<> sleepDuration(100, 1000);
+    withEntityCache([&](auto& cache)
+    {
+        cache.selectArea(boundingBox, consumer);
+    });
+}
 
-    // Distributions for newPosition generation
-    std::uniform_int_distribution<> posXDistribution(0, std::floor(lowerRight.getX()) - 1);
-    std::uniform_int_distribution<> posYDistribution(0, std::floor(lowerRight.getY()) - 1);
+bool World::isValidEntity(int id)
+{
+    return withEntityCache([&](auto& cache)
+    {
+        return cache.isValidEntity(id);
+    });
+}
 
-    while (!stopFlag) {
-        if (!isTesting)
-        {
-            entityCache.getAllEntities([&](EntityView<WorldEntity>& safeView) {
-                WorldEntity& entity = safeView.getHandle()->getEntity();
-                if (moveChance(gen) < 0.1) // 10% chance to move
-                {
-                    Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
-                    entity.updatePosition(newPosition);
-                }
-            });
-        }
-
-        // Sleep for a random time between 100ms and 1000ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleepDuration(gen)));
-    }
+WorldEntity& World::getEntityById(int id)
+{
+    return withEntityCache([&](auto& cache) -> WorldEntity&
+    {
+        return cache.getEntityById(id).getEntity();
+    });
 }
 
 void World::shuffleEntityPositions()
 {
-    if (entityCache.entityCount() == 0) return;
+    if (withEntityCache([&](auto& cache) { return cache.entityCount(); }) == 0) return;
 
-    // Random number generator setup
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> posXDistribution(0, std::floor(lowerRight.getX()) - 1);
     std::uniform_int_distribution<> posYDistribution(0, std::floor(lowerRight.getY()) - 1);
 
-    // Shuffle all entity positions
-    entityCache.getAllEntities([&](EntityView<WorldEntity>& safeView) {
-        WorldEntity& entity = safeView.getHandle()->getEntity();
-        Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
-        entity.updatePosition(newPosition);
+    withEntityCache([&](auto& cache)
+    {
+        cache.getAllEntities([&](EntityView<WorldEntity>& safeView)
+        {
+            Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
+            safeView.getEntity().updatePosition(newPosition);
+        });
     });
 }
 
+void World::randomMovementLoop()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> moveChance(0.0, 1.0);
+    std::uniform_int_distribution<> sleepDuration(100, 1000);
+    std::uniform_int_distribution<> posXDistribution(0, std::floor(lowerRight.getX()) - 1);
+    std::uniform_int_distribution<> posYDistribution(0, std::floor(lowerRight.getY()) - 1);
+
+    while (!stopFlag)
+    {
+        if (!isTesting)
+        {
+            withEntityCache([&](auto& cache)
+            {
+                cache.getAllEntities([&](EntityView<WorldEntity>& safeView)
+                {
+                    if (moveChance(gen) < 0.1) // 10% chance to move
+                    {
+                        Point2D newPosition(posXDistribution(gen), posYDistribution(gen));
+                        safeView.getEntity().updatePosition(newPosition);
+                    }
+                });
+            });
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepDuration(gen)));
+    }
 }
+
+} // namespace FrameworkUser
