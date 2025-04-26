@@ -14,7 +14,8 @@
 namespace FrameworkUser
 {
 
-int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 4;
+int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 2, BUTTONSIZE = 17;
+bool randomMovements = true;
 
 World world(Point2D(WIDTH, HEIGHT));
 
@@ -23,16 +24,39 @@ Point2D selectionPointA;
 Point2D selectionPointB;
 Rectangle selectionRectangle;
 
-Button blueButton = Button(Vector2{ static_cast<float>(WIDTH) - 180, static_cast<float>(HEIGHT) - 60 }, 20, 20, BLUE);
-Button greenButton = Button(Vector2{ static_cast<float>(WIDTH) - 150, static_cast<float>(HEIGHT) - 60 }, 20, 20, GREEN);
-Button redButton = Button(Vector2{ static_cast<float>(WIDTH) - 120, static_cast<float>(HEIGHT) - 60 }, 20, 20, RED);
-Button add10EntitiesButton = Button(Vector2{ static_cast<float>(40), static_cast<float>(70) }, 20, 20, LIGHTGRAY);
-Button add100EntitiesButton = Button(Vector2{ static_cast<float>(80), static_cast<float>(70) }, 20, 20, LIGHTGRAY);
-Button add1000EntitiesButton = Button(Vector2{ static_cast<float>(120), static_cast<float>(70) }, 20, 20, LIGHTGRAY);
-Button add10KEntitiesButton = Button(Vector2{ static_cast<float>(160), static_cast<float>(70) }, 20, 20, LIGHTGRAY);
-Button worldVectorButton = Button(Vector2{ static_cast<float>(WIDTH) - 180, static_cast<float>(30) }, 20, 20, LIGHTGRAY);
-Button worldBasicButton = Button(Vector2{ static_cast<float>(WIDTH) - 120, static_cast<float>(30) }, 20, 20, LIGHTGRAY);
+Button blueButton = Button(Vector2{ static_cast<float>(WIDTH) - 180, static_cast<float>(HEIGHT) - 60 }, BUTTONSIZE, BUTTONSIZE, BLUE);
+Button greenButton = Button(Vector2{ static_cast<float>(WIDTH) - 150, static_cast<float>(HEIGHT) - 60 }, BUTTONSIZE, BUTTONSIZE, GREEN);
+Button redButton = Button(Vector2{ static_cast<float>(WIDTH) - 120, static_cast<float>(HEIGHT) - 60 }, BUTTONSIZE, BUTTONSIZE, RED);
+Button worldVectorButton = Button(Vector2{ static_cast<float>(WIDTH) - 180, static_cast<float>(30) }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
+Button worldBasicButton = Button(Vector2{ static_cast<float>(WIDTH) - 120, static_cast<float>(30) }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
+Button randomMovementToggleButton = Button(Vector2{ static_cast<float>(460), 10 }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
+Button shuffleEntityPositionsButton = Button(Vector2{ static_cast<float>(560), 10 }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
+Button clearButton = Button(Vector2{ 250, 10 }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
 const char* currentAlgorithmText = nullptr;
+
+struct AddEntityButton {
+	Button button;
+	const char* label;
+	int count;
+};
+
+std::vector<AddEntityButton> addEntityButtons = {
+	{ Button(BUTTONSIZE, BUTTONSIZE), "100", 100 },
+	{ Button(BUTTONSIZE, BUTTONSIZE), "1k", 1000 },
+	{ Button(BUTTONSIZE, BUTTONSIZE), "10k", 10000 }
+};
+
+std::vector<AddEntityButton> addEntityLineButtons = {
+	{ Button(BUTTONSIZE, BUTTONSIZE), "100", 100 },
+	{ Button(BUTTONSIZE, BUTTONSIZE), "1k", 1000 },
+	{ Button(BUTTONSIZE, BUTTONSIZE), "10k", 10000 }
+};
+
+std::vector<AddEntityButton> addEntityClusterButtons = {
+	{ Button(BUTTONSIZE, BUTTONSIZE), "100", 100 },
+	{ Button(BUTTONSIZE, BUTTONSIZE), "1k", 1000 },
+	{ Button(BUTTONSIZE, BUTTONSIZE), "10k", 10000 }
+};
 
 void ClearEntities()
 {
@@ -98,22 +122,6 @@ void Update()
 		{
 			ColorSelection(EntityColor::Red);
 		}
-		else if (add10EntitiesButton.isPressed(mousePosition, true))
-		{
-			world.addNEntities(10);
-		}
-		else if (add100EntitiesButton.isPressed(mousePosition, true))
-		{
-			world.addNEntities(100);
-		}
-		else if (add1000EntitiesButton.isPressed(mousePosition, true))
-		{
-			world.addNEntities(1000);
-		}
-		else if (add10KEntitiesButton.isPressed(mousePosition, true))
-		{
-			world.addNEntities(10000);
-		}
 		else if (worldVectorButton.isPressed(mousePosition, true))
 		{
 			if (world.getCurrentCacheType() != CacheType::Deque)
@@ -132,20 +140,64 @@ void Update()
 				currentAlgorithmText = "Map";
 			}
 		}
+		else if (randomMovementToggleButton.isPressed(mousePosition, true))
+		{
+			randomMovements ? world.stopRandomMovements() : world.startRandomMovements();
+			randomMovements = !randomMovements;
+		}
+		else if (shuffleEntityPositionsButton.isPressed(mousePosition, true))
+		{
+			world.shuffleEntityPositions();
+		}
+		else if (clearButton.isPressed(mousePosition, true))
+		{
+			world.clear();
+		}
 		else
 		{
-			// Update selection end point
-			selectionPointB.setX(mousePosition.x);
-			selectionPointB.setY(mousePosition.y);
+			bool handled = false;
+			for (auto& b : addEntityButtons) {
+				if (b.button.isPressed(mousePosition, true)) {
+					world.addNEntities(b.count);
+					handled = true;
+					break;
+				}
+			}
+			if (!handled)
+				for (auto& b : addEntityLineButtons) {
+					if (b.button.isPressed(mousePosition, true)) {
+						world.addNEntitiesAlongLine(b.count);
+						handled = true;
+						break;
+					}
+				}
 
-			// Determine top-left corner of drawn Rectangle
-			selectionRectangle.x = std::min(selectionPointA.getX(), selectionPointB.getX());
-			selectionRectangle.y = std::min(selectionPointA.getY(), selectionPointB.getY());
+			if (!handled)
+				for (auto& b : addEntityClusterButtons)
+				{
+					if (b.button.isPressed(mousePosition, true))
+					{
+						world.addNEntitiesCluster(b.count);
+						handled = true;
+						break;
+					}
+				}
 
-			// Determine width and height of drawn Rectangle
-			selectionRectangle.width = abs(selectionPointA.getX() - selectionPointB.getX());
-			selectionRectangle.height = abs(selectionPointA.getY() - selectionPointB.getY());
-			squareSelection(PositionalCache::Bounds(selectionPointA, selectionPointB));
+			if (!handled) {
+				// Update selection end point
+				selectionPointB.setX(mousePosition.x);
+				selectionPointB.setY(mousePosition.y);
+
+				// Determine top-left corner of drawn Rectangle
+				selectionRectangle.x = std::min(selectionPointA.getX(), selectionPointB.getX());
+				selectionRectangle.y = std::min(selectionPointA.getY(), selectionPointB.getY());
+
+				// Determine width and height of drawn Rectangle
+				selectionRectangle.width = abs(selectionPointA.getX() - selectionPointB.getX());
+				selectionRectangle.height = abs(selectionPointA.getY() - selectionPointB.getY());
+				squareSelection(PositionalCache::Bounds(selectionPointA, selectionPointB));
+			}
+
 		}
 	}
 }
@@ -191,26 +243,44 @@ void Draw()
 
 	DrawRectangle(WIDTH - 200, HEIGHT - 100, 180, 70, GRAY);
 	DrawText("Color", WIDTH - 190, HEIGHT - 100, 30, BLACK);
-	DrawText("Press [C] to clear", 170, 30, 20, DARKGRAY);
-	DrawText("Add Entities", 30, 30, 20, WHITE);
-	DrawText("10", 40, 93, 17, WHITE);
-	DrawText("100", 80, 93, 17, WHITE);
-	DrawText("1000", 120, 93, 17, WHITE);
-	DrawText("10k", 160, 93, 17, WHITE);
+	// DrawText("(C to clear)", 170, 10, 15, LIGHTGRAY);
+	DrawText("Add Entities", 20, 10, 20, WHITE);
 	DrawText("Deque", static_cast<float>(WIDTH) - 200, 53, 17, WHITE);
 	DrawText("Map", static_cast<float>(WIDTH) - 120, 53, 17, WHITE);
 	DrawText("Cache Algorithms", static_cast<float>(WIDTH) - 200, 5, 17, WHITE);
 	DrawText(TextFormat("Current: %s", currentAlgorithmText), WIDTH - 200, 70, 17, YELLOW);
+	DrawText("Random Movements:", 300, 10, 17, WHITE);
+	DrawText("Shuffle:", 500, 10, 15, WHITE);
+	DrawText("Clear:", 200, 10, 17, WHITE);
+
 
 	blueButton.Draw();
 	greenButton.Draw();
 	redButton.Draw();
-	add10EntitiesButton.Draw();
-	add100EntitiesButton.Draw();
-	add1000EntitiesButton.Draw();
-	add10KEntitiesButton.Draw();
+
+	DrawText("Random Spread", 20, addEntityButtons[0].button.getPosition().y - 10, 10, WHITE);
+	for (auto& b : addEntityButtons) {
+		b.button.Draw();
+		DrawText(b.label, b.button.getPosition().x, b.button.getPosition().y + 23, 14, WHITE);
+	}
+
+	DrawText("Line", 20, addEntityLineButtons[0].button.getPosition().y - 10, 10, WHITE);
+	for (auto& b : addEntityLineButtons) {
+		b.button.Draw();
+		DrawText(b.label, b.button.getPosition().x, b.button.getPosition().y + 23, 14, WHITE);
+	}
+
+	DrawText("Cluster", 20, addEntityClusterButtons[0].button.getPosition().y - 10, 10, WHITE);
+	for (auto& b : addEntityClusterButtons) {
+		b.button.Draw();
+		DrawText(b.label, b.button.getPosition().x, b.button.getPosition().y + 23, 14, WHITE);
+	}
+
 	worldVectorButton.Draw();
 	worldBasicButton.Draw();
+	randomMovementToggleButton.Draw();
+	shuffleEntityPositionsButton.Draw();
+	clearButton.Draw();
 
 	EndDrawing();
 }
@@ -221,12 +291,23 @@ using namespace FrameworkUser;
 int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Positional Cache Demo");
-	SetTargetFPS(60);
+	SetTargetFPS(0);
 
 	std::srand(static_cast<unsigned>(std::time(0)));
 	currentAlgorithmText = (world.getCurrentCacheType() == FrameworkUser::CacheType::Deque) ? "Deque" : "Map";
 
 	world.startRandomMovements();
+	for (size_t i = 0; i < addEntityButtons.size(); ++i) {
+		addEntityButtons[i].button.setPosition(Vector2{ 20 + static_cast<float>(i) * 30, 50 });
+	}
+
+	for (size_t i = 0; i < addEntityLineButtons.size(); ++i) {
+		addEntityLineButtons[i].button.setPosition(Vector2{ 20 + static_cast<float>(i) * 30, 120 });
+	}
+
+	for (size_t i = 0; i < addEntityClusterButtons.size(); ++i) {
+		addEntityClusterButtons[i].button.setPosition(Vector2{ 20 + static_cast<float>(i) * 30, 190 });
+	}
 
 	while (!WindowShouldClose())
 	{

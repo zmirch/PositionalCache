@@ -91,6 +91,10 @@ public:
 
     void addNEntities(int n);
 
+    void addNEntitiesAlongLine(int n);
+
+    void addNEntitiesCluster(int n);
+
     void getAllEntities(std::function<void(EntityView<WorldEntity>& safeView)> consumer);
 
     void selectArea(PositionalCache::Bounds boundingBox, std::function<void(EntityView<WorldEntity>& safeView)> consumer);
