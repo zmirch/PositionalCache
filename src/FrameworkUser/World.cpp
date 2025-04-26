@@ -1,10 +1,13 @@
 #include "World.h"
 
+#include "../Framework/Algorithms/StaticQuadtreeAlgorithm.h"
+
 namespace FrameworkUser
 {
 using BasicCache = Cache<WorldEntity, BasicAlgorithm<WorldEntity>>;
 using DequeCache = Cache<WorldEntity, DequeAlgorithm<WorldEntity>>;
-using CacheVariant = std::variant<BasicCache, DequeCache>;
+using StaticQuadtreeCache = Cache<WorldEntity, StaticQuadtreeAlgorithm<WorldEntity>>;
+using CacheVariant = std::variant<BasicCache, DequeCache, StaticQuadtreeCache>;
 
 void World::setCacheType(CacheType type)
 {
@@ -17,6 +20,10 @@ void World::setCacheType(CacheType type)
         case CacheType::Basic:
             entityCache = BasicCache();
             break;
+        case CacheType::StaticQuadtree:
+            int maxDepth = 5;
+            entityCache = StaticQuadtreeCache(getWidth(), getHeight(), maxDepth);
+            break;
     }
     startRandomMovements();
 }
@@ -25,6 +32,8 @@ CacheType World::getCurrentCacheType() const
 {
     if (std::holds_alternative<DequeCache>(entityCache))
         return CacheType::Deque;
+    if (std::holds_alternative<StaticQuadtreeCache>(entityCache))
+        return CacheType::StaticQuadtree;
     return CacheType::Basic;
 }
 
@@ -33,14 +42,14 @@ World::World(Point2D lowerRight)
 {
 }
 
-World::World(const World& other)
-    : lowerRight(other.lowerRight),
-      entityCache(other.entityCache),
-      nextId(other.nextId),
-      stopFlag(other.stopFlag),
-      isTesting(other.isTesting)
-{
-}
+// World::World(const World& other)
+//     : lowerRight(other.lowerRight),
+//       entityCache(other.entityCache),
+//       nextId(other.nextId),
+//       stopFlag(other.stopFlag),
+//       isTesting(other.isTesting)
+// {
+// }
 
 World::World(World&& other) noexcept
     : lowerRight(std::move(other.lowerRight)),

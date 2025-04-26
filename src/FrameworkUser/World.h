@@ -12,6 +12,7 @@
 #include "../Framework/Bounds.h"
 #include "../Framework/Algorithms/BasicAlgorithm.h"
 #include "../Framework/Algorithms/DequeAlgorithm.h"
+#include "../Framework/Algorithms/StaticQuadtreeAlgorithm.h"
 
 using namespace PositionalCache;
 
@@ -20,9 +21,10 @@ namespace FrameworkUser
 
 using BasicCache = Cache<WorldEntity, BasicAlgorithm<WorldEntity>>;
 using DequeCache = Cache<WorldEntity, DequeAlgorithm<WorldEntity>>;
-using CacheVariant = std::variant<BasicCache, DequeCache>;
+using StaticQuadtreeCache = Cache<WorldEntity, StaticQuadtreeAlgorithm<WorldEntity>>;
+using CacheVariant = std::variant<BasicCache, DequeCache, StaticQuadtreeCache>;
 
-enum class CacheType { Deque, Basic };
+enum class CacheType { Deque, Basic, StaticQuadtree };
 
 class World
 {
@@ -44,18 +46,18 @@ public:
 
     World(World&& other) noexcept;
 
-    World& operator=(const World& other)
-    {
-        if (this != &other) {
-            stopRandomMovements();
-            lowerRight = other.lowerRight;
-            entityCache = other.entityCache;
-            nextId = other.nextId;
-            stopFlag = other.stopFlag;
-            isTesting = other.isTesting;
-        }
-        return *this;
-    }
+    // World& operator=(const World& other)
+    // {
+    //     if (this != &other) {
+    //         stopRandomMovements();
+    //         lowerRight = other.lowerRight;
+    //         entityCache = other.entityCache;
+    //         nextId = other.nextId;
+    //         stopFlag = other.stopFlag;
+    //         isTesting = other.isTesting;
+    //     }
+    //     return *this;
+    // }
 
     World& operator=(World&& other) noexcept
     {

@@ -71,7 +71,7 @@ namespace PositionalCache
             entitiesDeque.clear();
         }
     private:
-        std::unordered_map <int, std::shared_ptr<PositionalCache::Entity<E>>> entitiesMap{};
+        std::unordered_map <int, std::shared_ptr<Entity<E>>> entitiesMap{};
         std::deque<std::shared_ptr<Entity<E>>> entitiesDeque{};
     };
 }

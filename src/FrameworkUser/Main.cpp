@@ -29,6 +29,7 @@ Button greenButton = Button(Vector2{ static_cast<float>(WIDTH) - 150, static_cas
 Button redButton = Button(Vector2{ static_cast<float>(WIDTH) - 120, static_cast<float>(HEIGHT) - 60 }, BUTTONSIZE, BUTTONSIZE, RED);
 Button worldVectorButton = Button(Vector2{ static_cast<float>(WIDTH) - 180, static_cast<float>(30) }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
 Button worldBasicButton = Button(Vector2{ static_cast<float>(WIDTH) - 120, static_cast<float>(30) }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
+Button worldStatQTButton = Button(Vector2{ static_cast<float>(WIDTH) - 60, static_cast<float>(30) }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
 Button randomMovementToggleButton = Button(Vector2{ static_cast<float>(460), 10 }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
 Button shuffleEntityPositionsButton = Button(Vector2{ static_cast<float>(560), 10 }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
 Button clearButton = Button(Vector2{ 250, 10 }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
@@ -140,6 +141,15 @@ void Update()
 				currentAlgorithmText = "Map";
 			}
 		}
+		else if (worldStatQTButton.isPressed(mousePosition, true))
+		{
+			if (world.getCurrentCacheType() != CacheType::StaticQuadtree)
+			{
+				ClearEntities();
+				world.setCacheType(CacheType::StaticQuadtree);
+				currentAlgorithmText = "StaticQuadtree";
+			}
+		}
 		else if (randomMovementToggleButton.isPressed(mousePosition, true))
 		{
 			randomMovements ? world.stopRandomMovements() : world.startRandomMovements();
@@ -247,6 +257,7 @@ void Draw()
 	DrawText("Add Entities", 20, 10, 20, WHITE);
 	DrawText("Deque", static_cast<float>(WIDTH) - 200, 53, 17, WHITE);
 	DrawText("Map", static_cast<float>(WIDTH) - 120, 53, 17, WHITE);
+	DrawText("StQTree", static_cast<float>(WIDTH) - 80, 53, 17, WHITE);
 	DrawText("Cache Algorithms", static_cast<float>(WIDTH) - 200, 5, 17, WHITE);
 	DrawText(TextFormat("Current: %s", currentAlgorithmText), WIDTH - 200, 70, 17, YELLOW);
 	DrawText("Random Movements:", 300, 10, 17, WHITE);
@@ -278,6 +289,7 @@ void Draw()
 
 	worldVectorButton.Draw();
 	worldBasicButton.Draw();
+	worldStatQTButton.Draw();
 	randomMovementToggleButton.Draw();
 	shuffleEntityPositionsButton.Draw();
 	clearButton.Draw();

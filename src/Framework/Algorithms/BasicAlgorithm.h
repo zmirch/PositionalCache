@@ -63,6 +63,6 @@ public:
         entitiesMap.clear();
     }
 private:
-    std::unordered_map <int, std::shared_ptr<PositionalCache::Entity<E>>> entitiesMap{};
+    std::unordered_map <int, std::shared_ptr<Entity<E>>> entitiesMap{};
 };
 }

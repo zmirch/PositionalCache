@@ -18,6 +18,10 @@ namespace PositionalCache
 template <typename E, typename Algorithm>
 class Cache {
 public:
+    template<typename... Args>
+    Cache(Args&&... args) : algorithm(std::forward<Args>(args)...) // construct algorithm with args
+    {}
+
     void addEntity(std::unique_ptr<E>&& entity, const Point2D& position, int id)
     {
         algorithm.addEntity(std::move(entity), position, id);

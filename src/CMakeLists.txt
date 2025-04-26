@@ -11,6 +11,7 @@ add_executable(PositionalCache
         Framework/EntityView.h
         Framework/Algorithms/BasicAlgorithm.h
         Framework/Algorithms/DequeAlgorithm.h
+        Framework/Algorithms/StaticQuadtreeAlgorithm.h
 )
 
 # Link Raylib to the executable
