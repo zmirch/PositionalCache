@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-#include <vector>
 #include "Point2D.h"
 
 namespace PositionalCache
@@ -10,8 +9,8 @@ template <typename E>
 class Entity
 {
 public:
-	Entity(std::unique_ptr<E>&& entity, int id, const Point2D& position)
-		: engineEntityPtr(entity.release()), id(id), position(position) {}
+	Entity(std::unique_ptr<E>&& entity, int id, const Point2D& position, const std::function<void (Entity<E>&, const Point2D&)>& updateCallback)
+		: engineEntityPtr(entity.release()), id(id), position(position), updateCallback(updateCallback) {}
 
 	E& getEntity()
 	{
@@ -30,8 +29,11 @@ public:
 
 	void updatePosition(Point2D newCoordinates)
 	{
+		Point2D oldCoordinates = position;
 		position.setX(newCoordinates.getX());
 		position.setY(newCoordinates.getY());
+		//if (updateCallback)
+		updateCallback(*this, oldCoordinates);
 	}
 
 	Point2D getPosition() const
@@ -58,12 +60,15 @@ public:
 
 	Entity(const Entity& entityHandle) = delete;
 	Entity& operator= (const Entity& entityHandle) = delete;
-	Entity(Entity&& other) noexcept {
-		engineEntityPtr = other.engineEntityPtr;
-		id = other.id;
-		position = other.position;
-		other.engineEntityPtr = nullptr;
+	Entity(Entity&& other) noexcept
+	: engineEntityPtr(other.engineEntityPtr),
+	  id(other.id),
+	  position(other.position),
+	  updateCallback(std::move(other.updateCallback))
+	{
+			other.engineEntityPtr = nullptr;
 	}
+
 	Entity& operator=(Entity&& other) noexcept {
 		engineEntityPtr = other.engineEntityPtr;
 		id = other.id;
@@ -72,10 +77,16 @@ public:
 		return *this;
 	}
 
+	void Update()
+	{
+		updateCallback(position);
+	}
+
 private:
 	E* engineEntityPtr = nullptr;
-	Point2D position;
 	int id;
+	Point2D position;
+	std::function<void (Entity<E>&, const Point2D&)> updateCallback;
 };
 }
 

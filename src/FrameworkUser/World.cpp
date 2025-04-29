@@ -25,7 +25,6 @@ void World::setCacheType(CacheType type)
             entityCache = StaticQuadtreeCache(getWidth(), getHeight(), maxDepth);
             break;
     }
-    startRandomMovements();
 }
 
 CacheType World::getCurrentCacheType() const

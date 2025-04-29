@@ -130,6 +130,8 @@ void Update()
 				ClearEntities();
 				world.setCacheType(CacheType::Deque);
 				currentAlgorithmText = "Deque";
+				if (randomMovements)
+					world.startRandomMovements();
 			}
 		}
 		else if (worldBasicButton.isPressed(mousePosition, true))
@@ -139,6 +141,8 @@ void Update()
 				ClearEntities();
 				world.setCacheType(CacheType::Basic);
 				currentAlgorithmText = "Map";
+				if (randomMovements)
+					world.startRandomMovements();
 			}
 		}
 		else if (worldStatQTButton.isPressed(mousePosition, true))
@@ -148,6 +152,8 @@ void Update()
 				ClearEntities();
 				world.setCacheType(CacheType::StaticQuadtree);
 				currentAlgorithmText = "StaticQuadtree";
+				if (randomMovements)
+					world.startRandomMovements();
 			}
 		}
 		else if (randomMovementToggleButton.isPressed(mousePosition, true))
@@ -303,7 +309,7 @@ using namespace FrameworkUser;
 int main()
 {
 	InitWindow(WIDTH, HEIGHT, "Positional Cache Demo");
-	SetTargetFPS(0);
+	SetTargetFPS(60);
 
 	std::srand(static_cast<unsigned>(std::time(0)));
 	currentAlgorithmText = (world.getCurrentCacheType() == FrameworkUser::CacheType::Deque) ? "Deque" : "Map";

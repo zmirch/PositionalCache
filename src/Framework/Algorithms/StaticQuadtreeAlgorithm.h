@@ -1,5 +1,5 @@
 #pragma once
-#include "BasicAlgorithm.h"
+#include <optional>
 
 namespace PositionalCache
 {
@@ -8,6 +8,7 @@ template <typename E>
 class StaticQuadtreeAlgorithm
 {
 public:
+
     StaticQuadtreeAlgorithm(int width, int height, int maxDepth = 4) : maxDepth(maxDepth), width(width), height(height)
     {
         root = std::make_unique<Node>(Bounds(Point2D(0, 0), Point2D(width, height)), 0, maxDepth);
@@ -15,7 +16,7 @@ public:
     void addEntity(std::unique_ptr<E>&& entity, const Point2D& position, int id)
     {
         Error::ASSERT(entitiesMap.find(id) == entitiesMap.end(), "Entity has already been added.");
-        Entity<E> newHandle(std::move(entity), id, position);
+        Entity<E> newHandle(std::move(entity), id, position, [this](Entity<E>& en, const Point2D& pos){updateEntityPosition(en, pos);});
         std::shared_ptr<Entity<E>> newEntity = std::make_shared<Entity<E>>(std::move(newHandle));
         entitiesMap.emplace(id, newEntity);
         root->insert(newEntity);
@@ -59,6 +60,30 @@ public:
         entitiesMap.clear();
         root = std::make_unique<Node>(Bounds(Point2D(0, 0), Point2D(width, height)), 0, maxDepth);
     }
+
+    void updateEntityPosition(Entity<E>& entity, const Point2D& oldPosition)
+    {
+        // Find quadtree node that has this entity.
+        Node* node = root->findLowestNode(oldPosition);
+        if (!node) return;
+
+        auto it = std::find_if(node->entities.begin(), node->entities.end(),
+            [&entity](const std::shared_ptr<Entity<E>>& e) {
+                return e.get() == &entity;
+            });
+
+        if (it != node->entities.end())
+        {
+            // Check if entity's new position is still within the current node's boundaries
+            if (!node->bounds.containsPosition(entity.getPosition()))
+            {
+                node->entities.erase(it);
+                root->insert(entitiesMap.at(entity.getId())); // re-classify it into the proper node
+            }
+        }
+    }
+
+
 private:
     int maxDepth = 4;
     int width, height;
@@ -179,7 +204,23 @@ private:
                 }
             }
         }
+        Node* findLowestNode(const Point2D& position)
+        {
+            if (isLeaf())
+            {
+                return this;
+            }
 
+            for (auto& child : children)
+            {
+                if (child->bounds.containsPosition(position))
+                {
+                    return child->findLowestNode(position);
+                }
+            }
+
+            return this;
+        }
     };
 };
 
