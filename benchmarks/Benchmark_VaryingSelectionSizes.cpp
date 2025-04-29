@@ -1,3 +1,4 @@
+#include <iostream>
 #include <stdexcept>
 #include <benchmark/benchmark.h>
 #include "../src/FrameworkUser/World.h"
@@ -11,6 +12,7 @@ CacheType intToCacheType(int value) {
     switch (value) {
         case 0: return CacheType::Deque;
         case 1: return CacheType::Basic;
+        case 2: return CacheType::StaticQuadtree;
         default: throw std::invalid_argument("Invalid cache type value");
     }
 }
@@ -22,14 +24,15 @@ static void BM_SquareSelection_VaryingSelectionSizes(benchmark::State& state) {
     int entityCount = 100000;  // Fixed entity count
 
     World world(Point2D(WIDTH, HEIGHT));
+    world.setCacheType(cacheType);
     world.clear();
     world.addNEntities(entityCount);
 
     Bounds testBounds(Point2D(0, 0), Point2D(selectionSize, selectionSize));
-
     // Benchmark loop
     for (auto _ : state) {
         state.PauseTiming();
+        selectedEntities.clear();
         world.shuffleEntityPositions();  // Shuffle entities before each iteration
         state.ResumeTiming();
 
@@ -49,6 +52,10 @@ BENCHMARK(BM_SquareSelection_VaryingSelectionSizes)
     ->Args({ 100, 1 })
     ->Args({ 500, 1 })
     ->Args({ std::min(WIDTH, HEIGHT) - 1, 1 })
+    ->Args({ 10, 2 })    // 2: StaticQTree (Grid)
+    ->Args({ 100, 2 })
+    ->Args({ 500, 2 })
+    ->Args({ std::min(WIDTH, HEIGHT) - 1, 2 })
 ->Unit(benchmark::kMillisecond);
 
 BENCHMARK_MAIN();

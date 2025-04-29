@@ -11,6 +11,7 @@ CacheType intToCacheType(int value) {
     switch (value) {
         case 0: return CacheType::Deque;
         case 1: return CacheType::Basic;
+        case 2: return CacheType::StaticQuadtree;
         default: throw std::invalid_argument("Invalid cache type value");
     }
 }
@@ -32,6 +33,7 @@ static void BM_SquareSelection_VaryingEntityCounts(benchmark::State& state) {
     // Benchmark loop
     for (auto _ : state) {
         state.PauseTiming();
+        selectedEntities.clear();
         world.shuffleEntityPositions();  // Shuffle entities before each iteration
         state.ResumeTiming();
 
@@ -51,6 +53,10 @@ BENCHMARK(BM_SquareSelection_VaryingEntityCounts)
     ->Args({1000, 1})
     ->Args({10000, 1})
     ->Args({100000, 1})
+    ->Args({100, 2})     // 2: StaticQTree (Grid)
+    ->Args({1000, 2})
+    ->Args({10000, 2})
+    ->Args({100000, 2})
     ->Unit(benchmark::kMillisecond);
 
 BENCHMARK_MAIN();

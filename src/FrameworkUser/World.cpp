@@ -41,15 +41,6 @@ World::World(Point2D lowerRight)
 {
 }
 
-// World::World(const World& other)
-//     : lowerRight(other.lowerRight),
-//       entityCache(other.entityCache),
-//       nextId(other.nextId),
-//       stopFlag(other.stopFlag),
-//       isTesting(other.isTesting)
-// {
-// }
-
 World::World(World&& other) noexcept
     : lowerRight(std::move(other.lowerRight)),
       entityCache(std::move(other.entityCache)),
