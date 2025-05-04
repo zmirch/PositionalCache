@@ -46,19 +46,6 @@ public:
 
     World(World&& other) noexcept;
 
-    // World& operator=(const World& other)
-    // {
-    //     if (this != &other) {
-    //         stopRandomMovements();
-    //         lowerRight = other.lowerRight;
-    //         entityCache = other.entityCache;
-    //         nextId = other.nextId;
-    //         stopFlag = other.stopFlag;
-    //         isTesting = other.isTesting;
-    //     }
-    //     return *this;
-    // }
-
     World& operator=(World&& other) noexcept
     {
         if (this != &other) {
@@ -108,6 +95,8 @@ public:
     void shuffleEntityPositions();
 
     bool isTesting;
+
+    void forEachNodeBounds(std::function<void(const Bounds&)> consumer);
 
 private:
     CacheVariant entityCache;

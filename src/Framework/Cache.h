@@ -61,6 +61,11 @@ public:
     {
         algorithm.clear();
     }
+    using AlgorithmType = Algorithm;
+
+    Algorithm& getAlgorithm() { return algorithm; }
+
+    const Algorithm& getAlgorithm() const { return algorithm; }
 
 private:
     Algorithm algorithm;

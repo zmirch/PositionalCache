@@ -1,5 +1,7 @@
 #include "World.h"
 
+#include <iostream>
+
 #include "../Framework/Algorithms/StaticQuadtreeAlgorithm.h"
 
 namespace FrameworkUser
@@ -264,5 +266,18 @@ void World::randomMovementLoop()
         std::this_thread::sleep_for(std::chrono::milliseconds(sleepDuration(gen)));
     }
 }
+
+void World::forEachNodeBounds(std::function<void(const Bounds&)> consumer)
+{
+    std::visit([&](auto& cache)
+    {
+        using T = std::decay_t<decltype(cache)>;
+        if constexpr (std::is_same_v<typename T::AlgorithmType, StaticQuadtreeAlgorithm<WorldEntity>>)
+        {
+            cache.getAlgorithm().forEachNode(consumer);
+        }
+    }, entityCache);
+}
+
 
 } // namespace FrameworkUser

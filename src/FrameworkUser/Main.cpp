@@ -15,7 +15,7 @@ namespace FrameworkUser
 {
 
 int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 2, BUTTONSIZE = 17;
-bool randomMovements = true;
+bool randomMovements = true, showBoundariesToggle = false;
 
 World world(Point2D(WIDTH, HEIGHT));
 
@@ -33,6 +33,7 @@ Button worldStatQTButton = Button(Vector2{ static_cast<float>(WIDTH) - 60, stati
 Button randomMovementToggleButton = Button(Vector2{ static_cast<float>(460), 10 }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
 Button shuffleEntityPositionsButton = Button(Vector2{ static_cast<float>(560), 10 }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
 Button clearButton = Button(Vector2{ 250, 10 }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
+Button showBoundsButton = Button(Vector2{ static_cast<float>(710), 10 }, BUTTONSIZE, BUTTONSIZE, LIGHTGRAY);
 const char* currentAlgorithmText = nullptr;
 
 struct AddEntityButton {
@@ -169,6 +170,10 @@ void Update()
 		{
 			world.clear();
 		}
+		else if (showBoundsButton.isPressed(mousePosition, true))
+		{
+			showBoundariesToggle = !showBoundariesToggle;
+		}
 		else
 		{
 			bool handled = false;
@@ -269,6 +274,7 @@ void Draw()
 	DrawText("Random Movements:", 300, 10, 17, WHITE);
 	DrawText("Shuffle:", 500, 10, 15, WHITE);
 	DrawText("Clear:", 200, 10, 17, WHITE);
+	DrawText("Show Bounds:", 600, 10, 17, WHITE);
 
 
 	blueButton.Draw();
@@ -299,6 +305,21 @@ void Draw()
 	randomMovementToggleButton.Draw();
 	shuffleEntityPositionsButton.Draw();
 	clearButton.Draw();
+	showBoundsButton.Draw();
+
+	if (showBoundariesToggle)
+	{
+		world.forEachNodeBounds([](const Bounds& b)
+			{
+				float x = b.getPointA().getX();
+				float y = b.getPointA().getY();
+				float boundWidth = b.getPointB().getX() - b.getPointA().getX();
+				float boundHeight = b.getPointB().getY() - b.getPointA().getY();
+
+				DrawRectangleLines(x, y, boundWidth, boundHeight, WHITE);
+			});
+	}
+
 
 	EndDrawing();
 }

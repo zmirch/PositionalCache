@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <optional>
 
 namespace PositionalCache
@@ -83,6 +84,11 @@ public:
         }
     }
 
+    void forEachNode(std::function<void(const Bounds&)> consumer) const
+    {
+        if (root)
+            root->forEachNode(consumer);
+    }
 
 private:
     int maxDepth = 4;
@@ -220,6 +226,25 @@ private:
             }
 
             return this;
+        }
+
+        void forEachNode(std::function<void(const Bounds&)> consumer) const
+        {
+            consumer(bounds);
+            if (!isLeaf())
+            {
+                for (const auto& child : children)
+                {
+                    if (child)
+                        child->forEachNode(consumer);
+                }
+            }
+        }
+
+    public:
+        Bounds getBounds()
+        {
+            return bounds;
         }
     };
 };
