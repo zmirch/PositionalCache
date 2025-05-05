@@ -79,6 +79,7 @@ public:
             if (!node->bounds.containsPosition(entity.getPosition()))
             {
                 node->entities.erase(it);
+                node->tryCollapse();
                 root->insert(entitiesMap.at(entity.getId())); // re-classify it into the proper node
             }
         }
@@ -103,6 +104,7 @@ private:
         int depth;
         int maxDepth;
         std::deque<std::shared_ptr<Entity<E>>> entities;
+        Node* parent = nullptr;
         std::unique_ptr<Node> children[4]; // NW, NE, SW, SE
 
         Node(Bounds bounds, int depth, int maxDepth)
@@ -138,6 +140,11 @@ private:
                 center,
                 bottomRight
             ), depth + 1, maxDepth);
+
+            children[0]->parent = this;
+            children[1]->parent = this;
+            children[2]->parent = this;
+            children[3]->parent = this;
         }
 
         void insert(const std::shared_ptr<Entity<E>>& entity)
@@ -187,6 +194,32 @@ private:
                 }
             }
         }
+
+        void tryCollapse()
+        {
+            if (!isLeaf())
+            {
+                bool allEmpty = true;
+                for (auto& child : children)
+                {
+                    if (!child->isLeaf() || !child->entities.empty())
+                    {
+                        allEmpty = false;
+                        break;
+                    }
+                }
+
+                if (allEmpty)
+                {
+                    for (auto& child : children)
+                        child.reset();
+                }
+            }
+
+            if (parent)
+                parent->tryCollapse();
+        }
+
 
         void select(const Bounds& selection, std::function<void(EntityView<E>& handle)> consumer)
         {
