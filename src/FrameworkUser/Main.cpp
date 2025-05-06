@@ -247,6 +247,25 @@ void Draw()
 	BeginDrawing();
 	ClearBackground(BLACK);
 
+	if (showBoundariesToggle)
+	{
+		world.forEachNodeBounds([](const Bounds& b)
+		{
+			float x = b.getPointA().getX();
+			float y = b.getPointA().getY();
+			float boundWidth = b.getPointB().getX() - b.getPointA().getX();
+			float boundHeight = b.getPointB().getY() - b.getPointA().getY();
+
+			// DrawRectangleLines(x, y, boundWidth, boundHeight, WHITE);
+			Rectangle newRect;
+			newRect.x = x;
+			newRect.y = y;
+			newRect.width = boundWidth;
+			newRect.height = boundHeight;
+			DrawRectangleLinesEx(newRect, 0.5, LIGHTGRAY);
+		});
+	}
+
 	for (auto& entity : selectedEntities)
 	{
 		if(entity->hasEntity())
@@ -307,18 +326,7 @@ void Draw()
 	clearButton.Draw();
 	showBoundsButton.Draw();
 
-	if (showBoundariesToggle)
-	{
-		world.forEachNodeBounds([](const Bounds& b)
-			{
-				float x = b.getPointA().getX();
-				float y = b.getPointA().getY();
-				float boundWidth = b.getPointB().getX() - b.getPointA().getX();
-				float boundHeight = b.getPointB().getY() - b.getPointA().getY();
 
-				DrawRectangleLines(x, y, boundWidth, boundHeight, WHITE);
-			});
-	}
 
 
 	EndDrawing();

@@ -64,7 +64,7 @@ public:
 
     void updateEntityPosition(Entity<E>& entity, const Point2D& oldPosition)
     {
-        // Find quadtree node that has this entity.
+        // Find quadtree node that has this position.
         Node* node = root->findLowestNode(oldPosition);
         if (!node) return;
 

@@ -23,7 +23,7 @@ void World::setCacheType(CacheType type)
             entityCache = BasicCache();
             break;
         case CacheType::StaticQuadtree:
-            int maxDepth = 5;
+            int maxDepth = 7;
             entityCache = StaticQuadtreeCache(getWidth(), getHeight(), maxDepth);
             break;
     }
