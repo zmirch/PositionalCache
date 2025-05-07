@@ -12,7 +12,7 @@
 #include "../Framework/Bounds.h"
 #include "../Framework/Algorithms/BasicAlgorithm.h"
 #include "../Framework/Algorithms/DequeAlgorithm.h"
-#include "../Framework/Algorithms/StaticQuadtreeAlgorithm.h"
+#include "../Framework/Algorithms/QuadtreeAlgorithm.h"
 
 using namespace PositionalCache;
 
@@ -21,7 +21,7 @@ namespace FrameworkUser
 
 using BasicCache = Cache<WorldEntity, BasicAlgorithm<WorldEntity>>;
 using DequeCache = Cache<WorldEntity, DequeAlgorithm<WorldEntity>>;
-using StaticQuadtreeCache = Cache<WorldEntity, StaticQuadtreeAlgorithm<WorldEntity>>;
+using StaticQuadtreeCache = Cache<WorldEntity, QuadtreeAlgorithm<WorldEntity>>;
 using CacheVariant = std::variant<BasicCache, DequeCache, StaticQuadtreeCache>;
 
 enum class CacheType { Deque, Basic, StaticQuadtree };

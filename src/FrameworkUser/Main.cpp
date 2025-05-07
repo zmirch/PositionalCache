@@ -326,9 +326,6 @@ void Draw()
 	clearButton.Draw();
 	showBoundsButton.Draw();
 
-
-
-
 	EndDrawing();
 }
 }

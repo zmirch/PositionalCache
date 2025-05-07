@@ -6,13 +6,13 @@ namespace PositionalCache
 {
 
 template <typename E>
-class StaticQuadtreeAlgorithm
+class QuadtreeAlgorithm
 {
 public:
 
-    StaticQuadtreeAlgorithm(int width, int height, int maxDepth = 4) : maxDepth(maxDepth), width(width), height(height)
+    QuadtreeAlgorithm(int width, int height, int maxDepth = 20, int maxEntitiesPerNode = 5) : maxDepth(maxDepth), maxEntitiesPerNode(maxEntitiesPerNode), width(width), height(height)
     {
-        root = std::make_unique<Node>(Bounds(Point2D(0, 0), Point2D(width, height)), 0, maxDepth);
+        root = std::make_unique<Node>(Bounds(Point2D(0, 0), Point2D(width, height)), 0, maxDepth, maxEntitiesPerNode);
     };
     void addEntity(std::unique_ptr<E>&& entity, const Point2D& position, int id)
     {
@@ -59,7 +59,7 @@ public:
     void clear()
     {
         entitiesMap.clear();
-        root = std::make_unique<Node>(Bounds(Point2D(0, 0), Point2D(width, height)), 0, maxDepth);
+        root = std::make_unique<Node>(Bounds(Point2D(0, 0), Point2D(width, height)), 0, maxDepth, maxEntitiesPerNode);
     }
 
     void updateEntityPosition(Entity<E>& entity, const Point2D& oldPosition)
@@ -92,7 +92,8 @@ public:
     }
 
 private:
-    int maxDepth = 4;
+    int maxDepth;
+    int maxEntitiesPerNode;
     int width, height;
     std::unordered_map <int, std::shared_ptr<Entity<E>>> entitiesMap{};
     struct Node;
@@ -103,12 +104,13 @@ private:
         Bounds bounds;
         int depth;
         int maxDepth;
+        int maxEntitiesPerNode;
         std::deque<std::shared_ptr<Entity<E>>> entities;
         Node* parent = nullptr;
         std::unique_ptr<Node> children[4]; // NW, NE, SW, SE
 
-        Node(Bounds bounds, int depth, int maxDepth)
-            : bounds(bounds), depth(depth), maxDepth(maxDepth) {}
+        Node(Bounds bounds, int depth, int maxDepth, int maxEntitiesPerNode)
+            : bounds(bounds), depth(depth), maxDepth(maxDepth), maxEntitiesPerNode(maxEntitiesPerNode) {}
 
         bool isLeaf() const
         {
@@ -124,57 +126,103 @@ private:
             children[0] = std::make_unique<Node>(Bounds(            // NW (top-left quadrant)
                 topLeft,
                 center
-            ), depth + 1, maxDepth);
+            ), depth + 1, maxDepth, maxEntitiesPerNode);
 
             children[1] = std::make_unique<Node>(Bounds(            // NE (top-right quadrant)
                 Point2D(center.getX(), topLeft.getY()),
                 Point2D(bottomRight.getX(), center.getY())
-            ), depth + 1, maxDepth);
+            ), depth + 1, maxDepth, maxEntitiesPerNode);
 
             children[2] = std::make_unique<Node>(Bounds(            // SW (bottom-left quadrant)
                 Point2D(topLeft.getX(), center.getY()),
                 Point2D(center.getX(), bottomRight.getY())
-            ), depth + 1, maxDepth);
+            ), depth + 1, maxDepth, maxEntitiesPerNode);
 
             children[3] = std::make_unique<Node>(Bounds(            // SE (bottom-right quadrant)
                 center,
                 bottomRight
-            ), depth + 1, maxDepth);
+            ), depth + 1, maxDepth, maxEntitiesPerNode);
 
-            children[0]->parent = this;
-            children[1]->parent = this;
-            children[2]->parent = this;
-            children[3]->parent = this;
-        }
+            for (auto & i : children)
+                i->parent = this;
 
-        void insert(const std::shared_ptr<Entity<E>>& entity)
-        {
-            if (depth >= maxDepth)
+            // Redistribute current entities
+            std::deque<std::shared_ptr<Entity<E>>> toReinsert = std::move(entities);
+            entities.clear();
+
+            for (auto& entity : toReinsert)
             {
-                entities.push_back(entity);
-                return;
-            }
-
-            if (isLeaf())
-                subdivide();
-
-            bool inserted = false;
-            for (auto& child : children)
-            {
-                if (child->bounds.containsPosition(entity->getPosition()))
+                bool inserted = false;
+                for (auto& child : children)
                 {
-                    child->insert(entity);
-                    inserted = true;
-                    break;
+                    if (child->bounds.containsPosition(entity->getPosition()))
+                    {
+                        child->insert(entity);
+                        inserted = true;
+                        break;
+                    }
+                }
+
+                if (!inserted)
+                {
+                    // If it doesn't fit neatly, keep in current node
+                    entities.push_back(entity);
                 }
             }
 
-            if (!inserted)
+        }
+
+        // void insert(const std::shared_ptr<Entity<E>>& entity)
+        // {
+        //     if (depth >= maxDepth)
+        //     {
+        //         entities.push_back(entity);
+        //         return;
+        //     }
+        //
+        //     if (isLeaf())
+        //         subdivide();
+        //
+        //     bool inserted = false;
+        //     for (auto& child : children)
+        //     {
+        //         if (child->bounds.containsPosition(entity->getPosition()))
+        //         {
+        //             child->insert(entity);
+        //             inserted = true;
+        //             break;
+        //         }
+        //     }
+        //
+        //     if (!inserted)
+        //     {
+        //         // If it somehow doesn't fit into a child node, keep it here
+        //         entities.push_back(entity);
+        //     }
+        // }
+
+        void insert(const std::shared_ptr<Entity<E>>& entity)
+        {
+            if (!isLeaf())
             {
-                // If it somehow doesn't fit into a child node, keep it here
-                entities.push_back(entity);
+                for (auto& child : children)
+                {
+                    if (child->bounds.containsPosition(entity->getPosition()))
+                    {
+                        child->insert(entity);
+                        return;
+                    }
+                }
+            }
+
+            entities.push_back(entity);
+
+            if (isLeaf() && entities.size() > maxEntitiesPerNode && depth < maxDepth)
+            {
+                subdivide();
             }
         }
+
 
         void remove(const std::shared_ptr<Entity<E>>& entity)
         {

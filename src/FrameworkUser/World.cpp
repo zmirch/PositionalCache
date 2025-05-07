@@ -2,13 +2,13 @@
 
 #include <iostream>
 
-#include "../Framework/Algorithms/StaticQuadtreeAlgorithm.h"
+#include "../Framework/Algorithms/QuadtreeAlgorithm.h"
 
 namespace FrameworkUser
 {
 using BasicCache = Cache<WorldEntity, BasicAlgorithm<WorldEntity>>;
 using DequeCache = Cache<WorldEntity, DequeAlgorithm<WorldEntity>>;
-using StaticQuadtreeCache = Cache<WorldEntity, StaticQuadtreeAlgorithm<WorldEntity>>;
+using StaticQuadtreeCache = Cache<WorldEntity, QuadtreeAlgorithm<WorldEntity>>;
 using CacheVariant = std::variant<BasicCache, DequeCache, StaticQuadtreeCache>;
 
 void World::setCacheType(CacheType type)
@@ -23,8 +23,9 @@ void World::setCacheType(CacheType type)
             entityCache = BasicCache();
             break;
         case CacheType::StaticQuadtree:
-            int maxDepth = 7;
-            entityCache = StaticQuadtreeCache(getWidth(), getHeight(), maxDepth);
+            int maxDepth = 20;
+            int maxEntitiesPerNode = 5;
+            entityCache = StaticQuadtreeCache(getWidth(), getHeight(), maxDepth, maxEntitiesPerNode);
             break;
     }
 }
@@ -272,7 +273,7 @@ void World::forEachNodeBounds(std::function<void(const Bounds&)> consumer)
     std::visit([&](auto& cache)
     {
         using T = std::decay_t<decltype(cache)>;
-        if constexpr (std::is_same_v<typename T::AlgorithmType, StaticQuadtreeAlgorithm<WorldEntity>>)
+        if constexpr (std::is_same_v<typename T::AlgorithmType, QuadtreeAlgorithm<WorldEntity>>)
         {
             cache.getAlgorithm().forEachNode(consumer);
         }
