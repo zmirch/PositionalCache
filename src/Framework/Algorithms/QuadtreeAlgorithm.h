@@ -61,7 +61,6 @@ public:
         entitiesMap.clear();
         root = std::make_unique<Node>(Bounds(Point2D(0, 0), Point2D(width, height)), 0, maxDepth, maxEntitiesPerNode);
     }
-
     void updateEntityPosition(Entity<E>& entity, const Point2D& oldPosition)
     {
         // Find quadtree node that has this position.
@@ -172,35 +171,6 @@ private:
 
         }
 
-        // void insert(const std::shared_ptr<Entity<E>>& entity)
-        // {
-        //     if (depth >= maxDepth)
-        //     {
-        //         entities.push_back(entity);
-        //         return;
-        //     }
-        //
-        //     if (isLeaf())
-        //         subdivide();
-        //
-        //     bool inserted = false;
-        //     for (auto& child : children)
-        //     {
-        //         if (child->bounds.containsPosition(entity->getPosition()))
-        //         {
-        //             child->insert(entity);
-        //             inserted = true;
-        //             break;
-        //         }
-        //     }
-        //
-        //     if (!inserted)
-        //     {
-        //         // If it somehow doesn't fit into a child node, keep it here
-        //         entities.push_back(entity);
-        //     }
-        // }
-
         void insert(const std::shared_ptr<Entity<E>>& entity)
         {
             if (!isLeaf())
@@ -214,7 +184,6 @@ private:
                     }
                 }
             }
-
             entities.push_back(entity);
 
             if (isLeaf() && entities.size() > maxEntitiesPerNode && depth < maxDepth)
@@ -222,7 +191,6 @@ private:
                 subdivide();
             }
         }
-
 
         void remove(const std::shared_ptr<Entity<E>>& entity)
         {
@@ -256,18 +224,15 @@ private:
                         break;
                     }
                 }
-
                 if (allEmpty)
                 {
                     for (auto& child : children)
                         child.reset();
                 }
             }
-
             if (parent)
                 parent->tryCollapse();
         }
-
 
         void select(const Bounds& selection, std::function<void(EntityView<E>& handle)> consumer)
         {

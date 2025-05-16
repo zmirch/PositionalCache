@@ -2,14 +2,8 @@
 
 #include <iostream>
 
-#include "../Framework/Algorithms/QuadtreeAlgorithm.h"
-
 namespace FrameworkUser
 {
-using BasicCache = Cache<WorldEntity, BasicAlgorithm<WorldEntity>>;
-using DequeCache = Cache<WorldEntity, DequeAlgorithm<WorldEntity>>;
-using StaticQuadtreeCache = Cache<WorldEntity, QuadtreeAlgorithm<WorldEntity>>;
-using CacheVariant = std::variant<BasicCache, DequeCache, StaticQuadtreeCache>;
 
 void World::setCacheType(CacheType type)
 {
@@ -22,11 +16,20 @@ void World::setCacheType(CacheType type)
         case CacheType::Basic:
             entityCache = BasicCache();
             break;
-        case CacheType::StaticQuadtree:
+        case CacheType::Quadtree:
+        {
             int maxDepth = 20;
             int maxEntitiesPerNode = 5;
-            entityCache = StaticQuadtreeCache(getWidth(), getHeight(), maxDepth, maxEntitiesPerNode);
+            entityCache = QuadtreeCache(getWidth(), getHeight(), maxDepth, maxEntitiesPerNode);
             break;
+        }
+        case CacheType::Grid:
+        {
+            int rowNum = 10;
+            int colNum = 10;
+            entityCache = GridCache(getWidth(), getHeight(), rowNum, colNum);
+            break;
+        }
     }
 }
 
@@ -34,8 +37,8 @@ CacheType World::getCurrentCacheType() const
 {
     if (std::holds_alternative<DequeCache>(entityCache))
         return CacheType::Deque;
-    if (std::holds_alternative<StaticQuadtreeCache>(entityCache))
-        return CacheType::StaticQuadtree;
+    if (std::holds_alternative<QuadtreeCache>(entityCache))
+        return CacheType::Quadtree;
     return CacheType::Basic;
 }
 

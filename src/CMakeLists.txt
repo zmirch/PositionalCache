@@ -12,6 +12,7 @@ add_executable(PositionalCache
         Framework/Algorithms/BasicAlgorithm.h
         Framework/Algorithms/DequeAlgorithm.h
         Framework/Algorithms/QuadtreeAlgorithm.h
+        Framework/Algorithms/GridAlgorithm.h
 )
 
 # Link Raylib to the executable

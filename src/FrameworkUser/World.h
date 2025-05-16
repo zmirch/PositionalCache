@@ -13,6 +13,7 @@
 #include "../Framework/Algorithms/BasicAlgorithm.h"
 #include "../Framework/Algorithms/DequeAlgorithm.h"
 #include "../Framework/Algorithms/QuadtreeAlgorithm.h"
+#include "../Framework/Algorithms/GridAlgorithm.h"
 
 using namespace PositionalCache;
 
@@ -21,10 +22,11 @@ namespace FrameworkUser
 
 using BasicCache = Cache<WorldEntity, BasicAlgorithm<WorldEntity>>;
 using DequeCache = Cache<WorldEntity, DequeAlgorithm<WorldEntity>>;
-using StaticQuadtreeCache = Cache<WorldEntity, QuadtreeAlgorithm<WorldEntity>>;
-using CacheVariant = std::variant<BasicCache, DequeCache, StaticQuadtreeCache>;
+using QuadtreeCache = Cache<WorldEntity, QuadtreeAlgorithm<WorldEntity>>;
+using GridCache = Cache<WorldEntity, GridAlgorithm<WorldEntity>>;
+using CacheVariant = std::variant<BasicCache, DequeCache, QuadtreeCache, GridCache>;
 
-enum class CacheType { Deque, Basic, StaticQuadtree };
+enum class CacheType { Deque, Basic, Quadtree, Grid };
 
 class World
 {

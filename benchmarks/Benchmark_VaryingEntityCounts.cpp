@@ -11,7 +11,7 @@ CacheType intToCacheType(int value) {
     switch (value) {
         case 0: return CacheType::Deque;
         case 1: return CacheType::Basic;
-        case 2: return CacheType::StaticQuadtree;
+        case 2: return CacheType::Quadtree;
         default: throw std::invalid_argument("Invalid cache type value");
     }
 }
