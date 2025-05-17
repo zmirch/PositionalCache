@@ -11,7 +11,8 @@ CacheType intToCacheType(int value) {
     switch (value) {
         case 0: return CacheType::Deque;
         case 1: return CacheType::Basic;
-        case 2: return CacheType::Quadtree;
+        case 2: return CacheType::Grid;
+        case 3: return CacheType::Quadtree;
         default: throw std::invalid_argument("Invalid cache type value");
     }
 }
@@ -22,7 +23,6 @@ static void BM_SquareSelection_VaryingEntityCounts(benchmark::State& state) {
     CacheType cacheType = intToCacheType(state.range(1));
     int selectionSize = 500;
 
-    // Set up testing environment
     World world(Point2D(WIDTH, HEIGHT));
     world.setCacheType(cacheType);
     world.clear();
@@ -30,7 +30,6 @@ static void BM_SquareSelection_VaryingEntityCounts(benchmark::State& state) {
 
     Bounds testBounds(Point2D(0, 0), Point2D(selectionSize, selectionSize));
 
-    // Benchmark loop
     for (auto _ : state) {
         state.PauseTiming();
         selectedEntities.clear();
@@ -45,18 +44,19 @@ static void BM_SquareSelection_VaryingEntityCounts(benchmark::State& state) {
 }
 
 BENCHMARK(BM_SquareSelection_VaryingEntityCounts)
-    ->Args({100, 0})     // 0: Vector
-    ->Args({1000, 0})
+    ->Args({1000, 0})       // 0: Vector
     ->Args({10000, 0})
     ->Args({100000, 0})
-    ->Args({100, 1})     // 1: Basic (Map)
-    ->Args({1000, 1})
+    ->Args({1000, 1})       // 1: Basic (Map)
     ->Args({10000, 1})
     ->Args({100000, 1})
-    ->Args({100, 2})     // 2: StaticQTree (Grid)
-    ->Args({1000, 2})
+    ->Args({1000, 2})       // 2: Grid
     ->Args({10000, 2})
     ->Args({100000, 2})
+    ->Args({1000, 3})       // 3: Quadtree
+    ->Args({10000, 3})
+    ->Args({100000, 3})
+    ->Iterations(100)
     ->Unit(benchmark::kMillisecond);
 
 BENCHMARK_MAIN();
