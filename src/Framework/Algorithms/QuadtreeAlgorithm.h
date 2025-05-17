@@ -84,10 +84,10 @@ public:
         }
     }
 
-    void forEachNode(std::function<void(const Bounds&)> consumer) const
+    void getNodeBounds(std::function<void(const Bounds&)> consumer) const
     {
         if (root)
-            root->forEachNode(consumer);
+            root->getNodeBounds(consumer);
     }
 
 private:
@@ -274,7 +274,7 @@ private:
             return this;
         }
 
-        void forEachNode(std::function<void(const Bounds&)> consumer) const
+        void getNodeBounds(std::function<void(const Bounds&)> consumer) const
         {
             consumer(bounds);
             if (!isLeaf())
@@ -282,7 +282,7 @@ private:
                 for (const auto& child : children)
                 {
                     if (child)
-                        child->forEachNode(consumer);
+                        child->getNodeBounds(consumer);
                 }
             }
         }

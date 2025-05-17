@@ -268,7 +268,6 @@ void Draw()
 			float boundWidth = b.getPointB().getX() - b.getPointA().getX();
 			float boundHeight = b.getPointB().getY() - b.getPointA().getY();
 
-			// DrawRectangleLines(x, y, boundWidth, boundHeight, WHITE);
 			Rectangle newRect;
 			newRect.x = x;
 			newRect.y = y;

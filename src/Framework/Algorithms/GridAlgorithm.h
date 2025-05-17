@@ -26,12 +26,12 @@ public:
                 cells[toIndex(row, col)] = Cell(b);
             }
         }
-
     };
+
     void addEntity(std::unique_ptr<E>&& entity, const Point2D& position, int id)
     {
         Error::ASSERT(entitiesMap.find(id) == entitiesMap.end(), "Entity has already been added.");
-        Entity<E> newHandle (std::move(entity), id, position, [](Entity<E>& entity, const Point2D& position){});
+        Entity<E> newHandle (std::move(entity), id, position, [this](Entity<E>& en, const Point2D& pos){updateEntityPosition(en, pos);});
         std::shared_ptr<Entity<E>> newEntity = std::make_shared<Entity<E>>(std::move(newHandle));
         entitiesMap.emplace(id, newEntity);
 
@@ -118,7 +118,13 @@ public:
         // Add to new cell
         newCell.push_back(entityPtr);
     }
-
+    void getNodeBounds(std::function<void(const Bounds&)> consumer) const
+    {
+        for (auto& cell : cells)
+        {
+            consumer(cell.bounds);
+        }
+    }
 
 private:
     int width, height, rowNum, colNum;

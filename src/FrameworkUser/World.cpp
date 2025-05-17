@@ -276,9 +276,12 @@ void World::forEachNodeBounds(std::function<void(const Bounds&)> consumer)
     std::visit([&](auto& cache)
     {
         using T = std::decay_t<decltype(cache)>;
-        if constexpr (std::is_same_v<typename T::AlgorithmType, QuadtreeAlgorithm<WorldEntity>>)
+        if constexpr (
+            std::is_same_v<typename T::AlgorithmType, QuadtreeAlgorithm<WorldEntity>> ||
+            std::is_same_v<typename T::AlgorithmType, GridAlgorithm<WorldEntity>>
+            )
         {
-            cache.getAlgorithm().forEachNode(consumer);
+            cache.getAlgorithm().getNodeBounds(consumer);
         }
     }, entityCache);
 }
