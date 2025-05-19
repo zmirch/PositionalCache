@@ -11,12 +11,12 @@ template <typename E>
 class GridAlgorithm
 {
 public:
-    GridAlgorithm(int width, int height, int rowNum, int colNum) : width(width), height(height), rowNum(rowNum), colNum(colNum)
+    GridAlgorithm(float width, float height, int rowNum, int colNum) : width(width), height(height), rowNum(rowNum), colNum(colNum)
     {
         cells.resize(rowNum * colNum);
 
-        float cellWidth = static_cast<float>(width) / colNum;
-        float cellHeight = static_cast<float>(height) / rowNum;
+        float cellWidth = width / colNum;
+        float cellHeight = height / rowNum;
 
         for (int row = 0; row < rowNum; ++row) {
             for (int col = 0; col < colNum; ++col) {
@@ -134,7 +134,8 @@ public:
     }
 
 private:
-    int width, height, rowNum, colNum;
+    float width, height;
+    int rowNum, colNum;
     std::unordered_map<int, std::shared_ptr<Entity<E>>> entitiesMap;
 
     struct Cell {

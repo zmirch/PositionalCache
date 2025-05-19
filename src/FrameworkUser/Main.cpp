@@ -14,7 +14,7 @@
 namespace FrameworkUser
 {
 
-int WIDTH = 1280, HEIGHT = 800, CIRCLERADIUS = 2, BUTTONSIZE = 17;
+float WIDTH = 1880, HEIGHT = 1000, CIRCLERADIUS = 2, BUTTONSIZE = 17;
 bool randomMovements = true, showBoundariesToggle = false;
 
 World world(Point2D(WIDTH, HEIGHT));

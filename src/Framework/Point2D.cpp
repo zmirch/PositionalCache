@@ -8,13 +8,13 @@ Point2D::Point2D()
 	setY(0);
 }
 
-Point2D::Point2D(double x, double y)
+Point2D::Point2D(float x, float y)
 {
 	setX(x);
 	setY(y);
 }
 
-void Point2D::setX(double x)
+void Point2D::setX(float x)
 {
 	//std::cout << "Setting X: " << x << std::endl;  // Debugging print
 	if (x >= 0) // Coordinates start at (0,0) in the upper left corner
@@ -24,7 +24,7 @@ void Point2D::setX(double x)
 
 }
 
-void Point2D::setY(double y)
+void Point2D::setY(float y)
 {
 	if (y >= 0)
 		this->y = y;
@@ -32,12 +32,12 @@ void Point2D::setY(double y)
 		this->y = 0;
 }
 
-double Point2D::getX() const
+float Point2D::getX() const
 {
 	return x;
 }
 
-double Point2D::getY() const
+float Point2D::getY() const
 {
 	return y;
 }

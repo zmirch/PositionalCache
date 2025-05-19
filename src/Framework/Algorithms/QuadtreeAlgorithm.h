@@ -10,7 +10,7 @@ class QuadtreeAlgorithm
 {
 public:
 
-    QuadtreeAlgorithm(int width, int height, int maxDepth = 20, int maxEntitiesPerNode = 5) : maxDepth(maxDepth), maxEntitiesPerNode(maxEntitiesPerNode), width(width), height(height)
+    QuadtreeAlgorithm(float width, float height, int maxDepth = 20, int maxEntitiesPerNode = 5) : maxDepth(maxDepth), maxEntitiesPerNode(maxEntitiesPerNode), width(width), height(height)
     {
         root = std::make_unique<Node>(Bounds(Point2D(0, 0), Point2D(width, height)), 0, maxDepth, maxEntitiesPerNode);
     };
@@ -93,7 +93,7 @@ public:
 private:
     int maxDepth;
     int maxEntitiesPerNode;
-    int width, height;
+    float width, height;
     std::unordered_map <int, std::shared_ptr<Entity<E>>> entitiesMap{};
     struct Node;
     std::unique_ptr<Node> root;
