@@ -63,7 +63,14 @@ public:
     void selectArea(const PositionalCache::Bounds& selection,
                 std::function<void(EntityView<E>& handle)> consumer)
     {
-        for (auto& cell : cells) {
+        std::pair<int, int> gridIndexA = toGridIndices(selection.getPointA());
+        std::pair<int, int> gridIndexB = toGridIndices(selection.getPointB());
+
+        int indexA = toIndex(gridIndexA.first, gridIndexA.second);
+        int indexB = toIndex(gridIndexB.first, gridIndexB.second);
+        for (int i = indexA; i < indexB; ++i)
+        {
+            auto& cell = cells[i];
             if (!cell.bounds.intersects(selection)) continue;
             for (auto& entity : cell.entities) {
                 if (selection.containsPosition(entity->getPosition())) {

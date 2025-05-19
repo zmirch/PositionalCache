@@ -348,7 +348,25 @@ int main()
 	SetTargetFPS(60);
 
 	std::srand(static_cast<unsigned>(std::time(0)));
-	currentAlgorithmText = (world.getCurrentCacheType() == FrameworkUser::CacheType::Deque) ? "Deque" : "Map";
+	// currentAlgorithmText = (world.getCurrentCacheType() == FrameworkUser::CacheType::Deque) ? "Deque" : "Map";
+	switch (world.getCurrentCacheType())
+	{
+		case FrameworkUser::CacheType::Deque:
+			currentAlgorithmText = "Deque";
+			break;
+		case FrameworkUser::CacheType::Basic:
+			currentAlgorithmText = "Map";
+			break;
+		case FrameworkUser::CacheType::Quadtree:
+			currentAlgorithmText = "Qtree";
+			break;
+		case FrameworkUser::CacheType::Grid:
+			currentAlgorithmText = "Grid";
+			break;
+		default:
+			currentAlgorithmText = "Unknown";
+			break;
+	}
 
 	world.startRandomMovements();
 	for (size_t i = 0; i < addEntityButtons.size(); ++i) {
