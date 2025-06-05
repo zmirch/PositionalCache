@@ -256,7 +256,7 @@ void DrawEntity(const EntityView<WorldEntity>& safeView)
 
 void Draw()
 {
-	BeginDrawing();
+
 	ClearBackground(BLACK);
 
 	if (showBoundariesToggle)
@@ -336,7 +336,7 @@ void Draw()
 	clearButton.Draw();
 	showBoundsButton.Draw();
 
-	EndDrawing();
+
 }
 }
 
@@ -381,10 +381,19 @@ int main()
 		addEntityClusterButtons[i].button.setPosition(Vector2{ 20 + static_cast<float>(i) * 30, 190 });
 	}
 
+	int ct = 0;
 	while (!WindowShouldClose())
 	{
 		Update();
-		Draw();
+
+		BeginDrawing();
+		if (ct == 5)
+		{
+			Draw();
+			ct = 0;
+		}
+		EndDrawing();
+		ct++;
 	}
 
 	CloseWindow();

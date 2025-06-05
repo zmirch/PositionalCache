@@ -16,12 +16,10 @@ Point2D::Point2D(float x, float y)
 
 void Point2D::setX(float x)
 {
-	//std::cout << "Setting X: " << x << std::endl;  // Debugging print
 	if (x >= 0) // Coordinates start at (0,0) in the upper left corner
 		this->x = x;
 	else
 		this->x = 0;
-
 }
 
 void Point2D::setY(float y)

@@ -60,26 +60,34 @@ public:
     {
         return entitiesMap.size();
     };
+
     void selectArea(const PositionalCache::Bounds& selection,
                 std::function<void(EntityView<E>& handle)> consumer)
     {
         std::pair<int, int> gridIndexA = toGridIndices(selection.getPointA());
         std::pair<int, int> gridIndexB = toGridIndices(selection.getPointB());
 
-        int indexA = toIndex(gridIndexA.first, gridIndexA.second);
-        int indexB = toIndex(gridIndexB.first, gridIndexB.second);
-        for (int i = indexA; i < indexB; ++i)
-        {
-            auto& cell = cells[i];
-            if (!cell.bounds.intersects(selection)) continue;
-            for (auto& entity : cell.entities) {
-                if (selection.containsPosition(entity->getPosition())) {
-                    EntityView<E> safeView(entity);
-                    consumer(safeView);
+        int startRow = std::min(gridIndexA.first, gridIndexB.first);
+        int endRow = std::max(gridIndexA.first, gridIndexB.first);
+        int startCol = std::min(gridIndexA.second, gridIndexB.second);
+        int endCol = std::max(gridIndexA.second, gridIndexB.second);
+
+        for (int row = startRow; row <= endRow; ++row) {
+            for (int col = startCol; col <= endCol; ++col) {
+                Cell& cell = cells[toIndex(row, col)];
+                if (!cell.bounds.intersects(selection)) continue;
+
+                for (auto& entity : cell.entities) {
+                    if (selection.containsPosition(entity->getPosition())) {
+                        EntityView<E> safeView(entity);
+                        consumer(safeView);
+                    }
                 }
             }
         }
+
     };
+
     void getAllEntities(std::function<void(EntityView<E>& view)> consumer)
     {
         for (auto& [id, entity] : entitiesMap)
@@ -88,14 +96,17 @@ public:
             consumer(safeView);
         }
     };
+
     Entity<E>& getEntityById(int id)
     {
         return *entitiesMap.at(id).get();
     };
+
     bool contains(int id)
     {
         return entitiesMap.find(id) != entitiesMap.end();
     };
+
     void clear()
     {
         entitiesMap.clear();
@@ -104,6 +115,7 @@ public:
             cell.entities.clear();
         }
     };
+
     void updateEntityPosition(Entity<E>& entity, const Point2D& oldPosition)
     {
         auto oldIndices = toGridIndices(oldPosition);
@@ -125,6 +137,7 @@ public:
         // Add to new cell
         newCell.push_back(entityPtr);
     }
+
     void getNodeBounds(std::function<void(const Bounds&)> consumer) const
     {
         for (auto& cell : cells)

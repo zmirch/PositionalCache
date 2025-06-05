@@ -77,11 +77,6 @@ public:
 		return *this;
 	}
 
-	void Update()
-	{
-		updateCallback(position);
-	}
-
 private:
 	E* engineEntityPtr = nullptr;
 	int id;
