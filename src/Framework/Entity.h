@@ -41,14 +41,6 @@ public:
 		return position;
 	}
 
-	struct Compare
-	{
-		bool operator() (const Entity<E>& lhs, const Entity<E>& rhs) const
-		{
-			return lhs.id < rhs.id;
-		}
-	};
-
 	~Entity()
 	{
 		if (engineEntityPtr)
