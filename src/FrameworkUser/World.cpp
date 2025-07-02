@@ -25,8 +25,8 @@ void World::setCacheType(CacheType type)
         }
         case CacheType::Grid:
         {
-            int rowNum = 10;
-            int colNum = 10;
+            int rowNum = 20;
+            int colNum = 20;
             entityCache = GridCache(getWidth(), getHeight(), rowNum, colNum);
             break;
         }
@@ -173,6 +173,48 @@ void World::addNEntitiesCluster(int n)
         distance = std::pow(distance, 3.0); // Bias toward 0
 
         double maxSpread = 50.0;
+        double actualDistance = distance * maxSpread;
+
+        // Convert polar to cartesian
+        double offsetX = actualDistance * std::cos(angle);
+        double offsetY = actualDistance * std::sin(angle);
+
+        double finalX = centerX + offsetX;
+        double finalY = centerY + offsetY;
+
+        // Ensure the entity is within bounds of the world
+        if (finalX < 0.0 || finalY < 0.0 || finalX >= width || finalY >= height)
+            continue;
+
+        addEntity(std::unique_ptr<WorldEntity>(new WorldEntity(nextId++)), Point2D(finalX, finalY));
+    }
+}
+
+void World::addEntityAtPosition(const Point2D& position)
+{
+    addEntity(std::unique_ptr<WorldEntity>(new WorldEntity(nextId++)), position);
+}
+
+void World::addNEntitiesCluster(int n, const Point2D& position, double maxSpread)
+{
+    double width = getWidth();
+    double height = getHeight();
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> angleDistribution(0.0, 2.0 * M_PI);
+    std::uniform_real_distribution<> distanceDistribution(0.0, 1.0);
+
+    // Pick a random center
+    double centerX = position.getX();
+    double centerY = position.getY();
+
+    for (int i = 0; i < n; ++i)
+    {
+        double angle = angleDistribution(gen);
+        double distance = distanceDistribution(gen);
+        distance = std::pow(distance, 3.0); // Bias toward 0
+
         double actualDistance = distance * maxSpread;
 
         // Convert polar to cartesian

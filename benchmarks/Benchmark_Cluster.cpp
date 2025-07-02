@@ -5,7 +5,7 @@
 using namespace FrameworkUser;
 
 std::vector<EntityHandle<WorldEntity>> selectedEntities;
-int WIDTH = 1280, HEIGHT = 800;
+int WIDTH = 1000, HEIGHT = 1000;
 
 CacheType intToCacheType(int value) {
     switch (value) {
@@ -17,25 +17,26 @@ CacheType intToCacheType(int value) {
     }
 }
 
-static void BM_SquareSelection_VaryingEntityCounts(benchmark::State& state) {
+static void BM_Cluster(benchmark::State& state) {
     // Get the entity count from the benchmark range
     int entityCount = state.range(0);
     CacheType cacheType = intToCacheType(state.range(1));
-    int selectionSize = 500;
+    int selectionSize = 30;
 
     World world(Point2D(WIDTH, HEIGHT));
     world.setCacheType(cacheType);
     world.clear();
-    world.addNEntities(entityCount);
+    //world.addEntityAtPosition(Point2D(10, 10));
+    world.addNEntitiesCluster(1000, Point2D(10, 10), 10);
+    world.addNEntitiesCluster(entityCount, Point2D(WIDTH/2, HEIGHT/2));
+
 
     Bounds testBounds(Point2D(0, 0), Point2D(selectionSize, selectionSize));
 
     for (auto _ : state) {
         state.PauseTiming();
         selectedEntities.clear();
-        world.shuffleEntityPositions();  // Shuffle entities before each iteration
         state.ResumeTiming();
-
         world.selectArea(testBounds, [&](EntityView<WorldEntity>& safeView) {
             selectedEntities.push_back(safeView.getHandle());
         });
@@ -43,19 +44,19 @@ static void BM_SquareSelection_VaryingEntityCounts(benchmark::State& state) {
     }
 }
 
-BENCHMARK(BM_SquareSelection_VaryingEntityCounts)
-    ->Args({1000, 0})       // 0: Deque
-    ->Args({10000, 0})
+BENCHMARK(BM_Cluster)
+    ->Args({10000, 0})       // 0: Deque
     ->Args({100000, 0})
-    ->Args({1000, 1})       // 1: Map
-    ->Args({10000, 1})
+    ->Args({1000000, 0})
+    ->Args({10000, 1})       // 1: Map
     ->Args({100000, 1})
-    ->Args({1000, 2})       // 2: Grid
-    ->Args({10000, 2})
+    ->Args({1000000, 1})
+    ->Args({10000, 2})       // 2: Grid
     ->Args({100000, 2})
-    ->Args({1000, 3})       // 3: Quadtree
-    ->Args({10000, 3})
+    ->Args({1000000, 2})
+    ->Args({10000, 3})       // 3: Quadtree
     ->Args({100000, 3})
+    ->Args({1000000, 3})
     ->Iterations(1000)
     ->Unit(benchmark::kMillisecond);
 

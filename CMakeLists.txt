@@ -4,6 +4,11 @@ project(PositionalCache)
 # Set the C++ standard to C++17
 set(CMAKE_CXX_STANDARD 17)
 
+# Default to Release build type if none was specified
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wno-old-style-cast)
 endif()
@@ -34,6 +39,8 @@ FetchContent_Declare(
         benchmark
         URL https://github.com/google/benchmark/archive/refs/tags/v1.8.2.zip
 )
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "Release flags" FORCE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "Global flags" FORCE)
 FetchContent_MakeAvailable(benchmark)
 
 # Add the performance tests

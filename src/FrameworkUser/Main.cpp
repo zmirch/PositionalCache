@@ -14,7 +14,7 @@
 namespace FrameworkUser
 {
 
-float WIDTH = 1880, HEIGHT = 1000, CIRCLERADIUS = 2, BUTTONSIZE = 17;
+float WIDTH = 1000, HEIGHT = 1000, CIRCLERADIUS = 1, BUTTONSIZE = 17;
 bool randomMovements = true, showBoundariesToggle = false;
 
 World world(Point2D(WIDTH, HEIGHT));
@@ -336,7 +336,18 @@ void Draw()
 	clearButton.Draw();
 	showBoundsButton.Draw();
 
+	 Rectangle newRect;
+	 newRect.x = 300;
+	 newRect.y = 300;
+	newRect.width = 150;
+	newRect.height = 150;
 
+	// Rectangle newRect;
+	// newRect.x = WIDTH/2 - 5;
+	// newRect.y = WIDTH/2 - 5;
+	// newRect.width = 10;
+	// newRect.height = 10;
+	DrawRectangleLinesEx(newRect, 2, WHITE);
 }
 }
 
@@ -380,7 +391,12 @@ int main()
 	for (size_t i = 0; i < addEntityClusterButtons.size(); ++i) {
 		addEntityClusterButtons[i].button.setPosition(Vector2{ 20 + static_cast<float>(i) * 30, 190 });
 	}
+	// world.setCacheType(CacheType::Quadtree);
+	//world.addNEntitiesCluster(100000, Point2D(WIDTH/2, HEIGHT/2), 200);
 
+	//world.addEntityAtPosition(Point2D(10, 10));
+	world.stopRandomMovements();
+	world.addNEntitiesCluster(100000, Point2D(WIDTH/2, HEIGHT/2), 200);
 	int ct = 0;
 	while (!WindowShouldClose())
 	{

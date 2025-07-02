@@ -1,11 +1,13 @@
 #include <stdexcept>
 #include <benchmark/benchmark.h>
+
+#include "../cmake-build-debug/_deps/benchmark-src/src/arraysize.h"
 #include "../src/FrameworkUser/World.h"
 
 using namespace FrameworkUser;
 
 std::vector<EntityHandle<WorldEntity>> selectedEntities;
-int WIDTH = 1280, HEIGHT = 800;
+int WIDTH = 1000, HEIGHT = 1000;
 
 CacheType intToCacheType(int value) {
     switch (value) {
@@ -17,25 +19,28 @@ CacheType intToCacheType(int value) {
     }
 }
 
-static void BM_SquareSelection_VaryingEntityCounts(benchmark::State& state) {
+static void BM_QTree(benchmark::State& state) {
     // Get the entity count from the benchmark range
     int entityCount = state.range(0);
     CacheType cacheType = intToCacheType(state.range(1));
-    int selectionSize = 500;
+    int selectionSize = 10;
 
     World world(Point2D(WIDTH, HEIGHT));
     world.setCacheType(cacheType);
     world.clear();
-    world.addNEntities(entityCount);
+    //world.addNEntitiesCluster(entityCount, Point2D(WIDTH/2, HEIGHT/2), 10);
+    //world.addNEntitiesCluster(entityCount, Point2D(100, 150), 30);
+    world.addNEntitiesCluster(entityCount, Point2D(WIDTH/2, HEIGHT/2), 200);
 
-    Bounds testBounds(Point2D(0, 0), Point2D(selectionSize, selectionSize));
-
+    //Bounds testBounds(Point2D(WIDTH/2 - selectionSize/2, HEIGHT/2 - selectionSize/2), Point2D(WIDTH/2 + selectionSize/2, HEIGHT/2 + selectionSize/2));
+    //Bounds testBounds(Point2D(WIDTH/2 - selectionSize/2, HEIGHT/2 - selectionSize/2), Point2D(WIDTH/2, HEIGHT/2));
+    Bounds testBounds(Point2D(300, 300), Point2D(450, 450));
+    //Bounds testBounds(Point2D(80, 130), Point2D(90, 150));
+    //Bounds testBounds(Point2D(750, 330), Point2D(820, 400));
     for (auto _ : state) {
         state.PauseTiming();
         selectedEntities.clear();
-        world.shuffleEntityPositions();  // Shuffle entities before each iteration
         state.ResumeTiming();
-
         world.selectArea(testBounds, [&](EntityView<WorldEntity>& safeView) {
             selectedEntities.push_back(safeView.getHandle());
         });
@@ -43,19 +48,11 @@ static void BM_SquareSelection_VaryingEntityCounts(benchmark::State& state) {
     }
 }
 
-BENCHMARK(BM_SquareSelection_VaryingEntityCounts)
-    ->Args({1000, 0})       // 0: Deque
-    ->Args({10000, 0})
-    ->Args({100000, 0})
-    ->Args({1000, 1})       // 1: Map
-    ->Args({10000, 1})
-    ->Args({100000, 1})
-    ->Args({1000, 2})       // 2: Grid
-    ->Args({10000, 2})
-    ->Args({100000, 2})
-    ->Args({1000, 3})       // 3: Quadtree
-    ->Args({10000, 3})
-    ->Args({100000, 3})
+BENCHMARK(BM_QTree)
+    ->Args({5000000, 0})     // 0: Deque
+    ->Args({5000000, 1})       // 1: Map
+    ->Args({5000000, 2})     // 2: Grid
+    ->Args({5000000, 3})       // 3: Quadtree
     ->Iterations(1000)
     ->Unit(benchmark::kMillisecond);
 

@@ -80,11 +80,15 @@ public:
 
     void setTestingStatus(bool status);
 
+    void addEntityAtPosition(const Point2D& position);
+
     void addNEntities(int n);
 
     void addNEntitiesAlongLine(int n);
 
     void addNEntitiesCluster(int n);
+
+    void addNEntitiesCluster(int n, const Point2D& position, double maxSpread = 50.0);
 
     void getAllEntities(std::function<void(EntityView<WorldEntity>& safeView)> consumer);
 

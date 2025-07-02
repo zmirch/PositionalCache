@@ -6,7 +6,7 @@
 using namespace FrameworkUser;
 
 std::vector<EntityHandle<WorldEntity>> selectedEntities;
-int WIDTH = 1280, HEIGHT = 800;
+int WIDTH = 1000, HEIGHT = 1000;
 
 CacheType intToCacheType(int value) {
     switch (value) {
@@ -45,10 +45,10 @@ static void BM_SquareSelection_VaryingSelectionSizes(benchmark::State& state) {
 }
 
 BENCHMARK(BM_SquareSelection_VaryingSelectionSizes)
-    ->Args({ 100, 0 })  // 0: Vector
+    ->Args({ 100, 0 })  // 0: Deque
     ->Args({ 500, 0 })
     ->Args({ std::min(WIDTH, HEIGHT) - 1, 0 })
-    ->Args({ 100, 1 })  // 1: Basic (Map)
+    ->Args({ 100, 1 })  // 1: Map
     ->Args({ 500, 1 })
     ->Args({ std::min(WIDTH, HEIGHT) - 1, 1 })
     ->Args({ 100, 2 })  // 2: Grid
@@ -57,7 +57,7 @@ BENCHMARK(BM_SquareSelection_VaryingSelectionSizes)
     ->Args({ 100, 3 })  // 3: Quadtree
     ->Args({ 500, 3 })
     ->Args({ std::min(WIDTH, HEIGHT) - 1, 3 })
-    ->Iterations(100)
+    ->Iterations(1000)
     ->Unit(benchmark::kMillisecond);
 
 BENCHMARK_MAIN();
