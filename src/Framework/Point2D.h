@@ -6,13 +6,13 @@ struct Point2D
 {
 public:
 	Point2D();
-	Point2D(double x, double y);
-	void setX(double x);
-	void setY(double y);
-	double getX() const;
-	double getY() const;
+	Point2D(float x, float y);
+	void setX(float x);
+	void setY(float y);
+	float getX() const;
+	float getY() const;
 private:
-	double x;
-	double y;
+	float x;
+	float y;
 };
 

@@ -14,7 +14,7 @@ public:
 	Point2D getPointA() const;
 	Point2D getPointB() const;
 	bool containsPosition(const Point2D& coordinate) const;
-	//void extendToIncludePosition(const Point2D& coordinate); // TODO in a later version
+	bool intersects(const Bounds& other) const;
 private:
 	Point2D pointA; // Top left corner
 	Point2D pointB; // Bottom right corner

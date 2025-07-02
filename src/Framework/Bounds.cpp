@@ -50,4 +50,14 @@ bool Bounds::containsPosition(const Point2D& coordinate) const
 		coordinate.getY() > pointB.getY() ||
 		coordinate.getY() < pointA.getY());
 }
+
+bool Bounds::intersects(const Bounds& other) const
+{
+	// If one rectangle is completely to the left, right, above, or below the other, they do not intersect
+	return !(pointB.getX() < other.pointA.getX() ||
+			 pointA.getX() > other.pointB.getX() ||
+			 pointB.getY() < other.pointA.getY() ||
+			 pointA.getY() > other.pointB.getY());
+}
+
 }

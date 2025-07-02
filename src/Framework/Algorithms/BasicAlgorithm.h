@@ -17,8 +17,8 @@ public:
     void addEntity(std::unique_ptr<E>&& entity, const Point2D& position, int id)
     {
         Error::ASSERT(entitiesMap.find(id) == entitiesMap.end(), "Entity has already been added.");
-        // TODO rename these
-        Entity<E> newHandle (std::move(entity), id, position);
+        Entity<E> newHandle (std::move(entity), id, position, [](Entity<E>& entity, const Point2D& position
+            ){});
         std::shared_ptr<Entity<E>> newEntity = std::make_shared<Entity<E>>(std::move(newHandle));
         entitiesMap.emplace(id, std::move(newEntity));
     }
@@ -63,6 +63,6 @@ public:
         entitiesMap.clear();
     }
 private:
-    std::unordered_map <int, std::shared_ptr<PositionalCache::Entity<E>>> entitiesMap{};
+    std::unordered_map <int, std::shared_ptr<Entity<E>>> entitiesMap{};
 };
 }

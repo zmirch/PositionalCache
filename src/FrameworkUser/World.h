@@ -12,6 +12,8 @@
 #include "../Framework/Bounds.h"
 #include "../Framework/Algorithms/BasicAlgorithm.h"
 #include "../Framework/Algorithms/DequeAlgorithm.h"
+#include "../Framework/Algorithms/QuadtreeAlgorithm.h"
+#include "../Framework/Algorithms/GridAlgorithm.h"
 
 using namespace PositionalCache;
 
@@ -20,9 +22,11 @@ namespace FrameworkUser
 
 using BasicCache = Cache<WorldEntity, BasicAlgorithm<WorldEntity>>;
 using DequeCache = Cache<WorldEntity, DequeAlgorithm<WorldEntity>>;
-using CacheVariant = std::variant<BasicCache, DequeCache>;
+using QuadtreeCache = Cache<WorldEntity, QuadtreeAlgorithm<WorldEntity>>;
+using GridCache = Cache<WorldEntity, GridAlgorithm<WorldEntity>>;
+using CacheVariant = std::variant<BasicCache, DequeCache, QuadtreeCache, GridCache>;
 
-enum class CacheType { Deque, Basic };
+enum class CacheType { Deque, Basic, Quadtree, Grid };
 
 class World
 {
@@ -43,19 +47,6 @@ public:
     World(const World& other);
 
     World(World&& other) noexcept;
-
-    World& operator=(const World& other)
-    {
-        if (this != &other) {
-            stopRandomMovements();
-            lowerRight = other.lowerRight;
-            entityCache = other.entityCache;
-            nextId = other.nextId;
-            stopFlag = other.stopFlag;
-            isTesting = other.isTesting;
-        }
-        return *this;
-    }
 
     World& operator=(World&& other) noexcept
     {
@@ -89,7 +80,15 @@ public:
 
     void setTestingStatus(bool status);
 
+    void addEntityAtPosition(const Point2D& position);
+
     void addNEntities(int n);
+
+    void addNEntitiesAlongLine(int n);
+
+    void addNEntitiesCluster(int n);
+
+    void addNEntitiesCluster(int n, const Point2D& position, double maxSpread = 50.0);
 
     void getAllEntities(std::function<void(EntityView<WorldEntity>& safeView)> consumer);
 
@@ -102,6 +101,8 @@ public:
     void shuffleEntityPositions();
 
     bool isTesting;
+
+    void forEachNodeBounds(std::function<void(const Bounds&)> consumer);
 
 private:
     CacheVariant entityCache;

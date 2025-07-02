@@ -13,6 +13,11 @@ void Button::setPosition(Vector2 position)
     this->position = position;
 }
 
+Vector2 Button::getPosition()
+{
+    return position;
+}
+
 void Button::setColor(Color color)
 {
     this->color = color;
