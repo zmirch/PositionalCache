@@ -335,19 +335,6 @@ void Draw()
 	shuffleEntityPositionsButton.Draw();
 	clearButton.Draw();
 	showBoundsButton.Draw();
-
-	 Rectangle newRect;
-	 newRect.x = 300;
-	 newRect.y = 300;
-	newRect.width = 150;
-	newRect.height = 150;
-
-	// Rectangle newRect;
-	// newRect.x = WIDTH/2 - 5;
-	// newRect.y = WIDTH/2 - 5;
-	// newRect.width = 10;
-	// newRect.height = 10;
-	DrawRectangleLinesEx(newRect, 2, WHITE);
 }
 }
 
@@ -359,7 +346,6 @@ int main()
 	SetTargetFPS(60);
 
 	std::srand(static_cast<unsigned>(std::time(0)));
-	// currentAlgorithmText = (world.getCurrentCacheType() == FrameworkUser::CacheType::Deque) ? "Deque" : "Map";
 	switch (world.getCurrentCacheType())
 	{
 		case FrameworkUser::CacheType::Deque:
@@ -391,12 +377,7 @@ int main()
 	for (size_t i = 0; i < addEntityClusterButtons.size(); ++i) {
 		addEntityClusterButtons[i].button.setPosition(Vector2{ 20 + static_cast<float>(i) * 30, 190 });
 	}
-	// world.setCacheType(CacheType::Quadtree);
-	//world.addNEntitiesCluster(100000, Point2D(WIDTH/2, HEIGHT/2), 200);
 
-	//world.addEntityAtPosition(Point2D(10, 10));
-	world.stopRandomMovements();
-	world.addNEntitiesCluster(100000, Point2D(WIDTH/2, HEIGHT/2), 200);
 	int ct = 0;
 	while (!WindowShouldClose())
 	{
